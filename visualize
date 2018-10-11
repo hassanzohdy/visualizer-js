@@ -23,7 +23,7 @@ if ($command === 'install') {
             rename('config.json.sample', 'config.json');
             system('composer install');
             touch($installedFile);
-            system('php visualize new blog');
+            system('php visualize new blog --path=/');
         }
     }
 
@@ -142,14 +142,24 @@ try {
  */
 function createAppConfig($appName, $config, $optionsList)
 {
-    $config->apps->$appName = (object) [
+    $options = [];
+    foreach ($optionsList as $option) {
+        list($optionName, $optionValue) = explode('=', $option);
+        $optionName = str_remove_start($optionName, '--');
+        if ($optionName == 'path' && $optionValue[0] != '/') {
+            $optionValue = "/$optionValue";
+        }
+        $options[$optionName] = $optionValue;
+    }
+    
+    $config->apps->$appName = (object) array_merge([
         'path' => '/' . $appName,
         'locale' => 'en',
         'title' => [
             'en' => ucfirst($appName),
         ],
         'locales' => ['en'],
-    ];
+    ], $options);
 
     // make sure the application with the / prefix be at the bottom of the list
 
