@@ -38,7 +38,7 @@ class FormHandler {
         }
 
         // load default plugins
-        let defaultPlugins = this.options.defaultPlugins;
+        let defaultPlugins = this.options.plugins;
 
         if (!Is.empty(defaultPlugins)) {
             this.register(...defaultPlugins);

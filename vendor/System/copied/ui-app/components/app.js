@@ -5,7 +5,5 @@ class App extends Application {
     */
     init() {
         // app initialized
-        let locale = DI.resolve('locale');
-        locale.load();
     }
 }

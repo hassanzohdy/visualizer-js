@@ -9,10 +9,7 @@ $command = array_shift($optionsList);
 
 if ($command === 'install') {
     if (file_exists($installedFile = 'vendor/System/storage/visualizer/installed')) {
-        Console::newLine(
-            Console::red('Framework is already installed!')
-        );
-        die;
+        die('Framework is already installed!');
     } else {
         if (! function_exists('system')) {
             die("Can't install Visualizer automatically, system function must be enabled");

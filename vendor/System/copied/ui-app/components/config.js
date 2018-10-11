@@ -9,6 +9,7 @@ Config.extend({
             onSubmit: true,
             buttons: FormHandler.FREEZE_ALL,
         },
+        plugins: [],
     },
     http: {
         endpoint: {
