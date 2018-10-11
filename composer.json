@@ -1,0 +1,26 @@
+{
+    "require": {
+        "symfony/http-foundation": "v4.1.4",
+        "symfony/http-kernel": "v4.1.4",
+        "symfony/browser-kit": "v4.1.4",
+        "symfony/debug": "v4.1.4",
+        "symfony/filesystem": "v4.1.4",
+        "symfony/finder": "v4.1.4",
+        "filp/whoops": "2.2.1",
+        "guzzlehttp/guzzle": "6.3.3",
+        "illuminate/support": "v5.4.36",
+        "illuminate/container": "v5.4.36",
+        "jaybizzle/crawler-detect": "v1.2.67",
+        "piwik/device-detector": "3.11.1",
+        "jenssegers/agent": "v2.6.0",
+        "leafo/scssphp": "^0.7.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "System\\": "vendor/System/"
+        },
+        "files": [
+            "vendor/System/helpers.php"
+        ]
+    }
+}

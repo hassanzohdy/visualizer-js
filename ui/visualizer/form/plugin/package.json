@@ -1,0 +1,7 @@
+{
+    "name": "form/plugin",
+    "dependencies": [
+        "macroable",
+        "form/form"
+    ]
+}

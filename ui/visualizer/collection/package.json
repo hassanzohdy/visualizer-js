@@ -1,0 +1,8 @@
+{
+    "name": "collection",
+    "vendor": {
+        "js": [
+            "javascript/collect.js/js/collect.min.js"
+        ]
+    }
+}

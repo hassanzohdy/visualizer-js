@@ -1,0 +1,127 @@
+html,
+body {
+    font-size: 10px;
+}
+
+a:focus,
+a:hover {
+    text-decoration: none;
+}
+
+*:focus {
+    outline: none;
+}
+
+*,
+*:before,
+*:after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+button {
+    cursor: pointer;
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0;
+}
+
+img {
+    max-width: 100%;
+}
+
+.line-through {
+    text-decoration: line-through !important;
+}
+
+.bold {
+    font-weight: bold !important;
+}
+
+.inline {
+    display: inline-block !important;
+}
+
+.block {
+    display: block !important;
+}
+
+.v-top {
+    vertical-align: top !important;
+}
+
+.v-middle {
+    vertical-align: middle !important;
+}
+
+.v-bottom {
+    vertical-align: bottom !important;
+}
+
+button {
+    border: none;
+    background: none;
+}
+
+[readonly] {
+    cursor: not-allowed;
+}
+
+.gray {
+    -webkit-filter: grayscale(1);
+    -webkit-filter: grayscale(100%);
+    filter: gray;
+    filter: grayscale(100%);
+    filter: url(desaturate.svg#greyscale);
+    -webkit-filter: grayscale(1);
+    -webkit-filter: grayscale(100%);
+    filter: gray;
+    filter: grayscale(100%);
+}
+
+.flipped {
+    transform: scaleX(-1);
+}
+
+.required {
+    color: red;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+.no-transition {
+    transition: none !important;
+}
+
+/** 
+* Center element Vertically 
+* This requires the selector to have at any non static-position value
+*/
+
+.v-center {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/** 
+* Center element horizontally 
+* This requires the selector to have at any non static-position value
+*/
+
+.h-center {
+    left: 50%;
+    transform: translateX(-50%);
+}

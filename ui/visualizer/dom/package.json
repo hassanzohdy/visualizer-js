@@ -1,0 +1,7 @@
+{
+    "name": "dom",
+    "components": [
+        "dom/builder",
+        "dom/meta"
+    ]
+}

@@ -1,0 +1,8 @@
+{
+    "name": "bootstrap",
+    "version": 1.0,
+    "components": [
+        "bootstrap/bootstrap",
+        "bootstrap/plugin"
+    ]
+}

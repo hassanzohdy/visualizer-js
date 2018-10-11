@@ -1,0 +1,10 @@
+{
+    "name": "core/layout/page",
+    "dependencies": [
+        "dom",
+        "core/view",
+        "core/events",
+        "core/router",
+        "core/layout/layout"
+    ]
+}

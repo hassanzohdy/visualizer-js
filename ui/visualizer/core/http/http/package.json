@@ -1,0 +1,6 @@
+{
+    "name": "core/http/http",
+    "dependencies": [
+        "core/events"
+    ]
+}

@@ -1,0 +1,13 @@
+{
+    "name": "support/human-time",
+    "dependencies": [
+        "core/events",
+        "random",
+        "support/is"
+    ],
+    "vendor": {
+        "js": [
+            "javascript/timeago.js/js/timeago.min.js"
+        ]
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "name": "alert",
+    "dependencies": [
+        "core/view",
+        "random",
+        "animator",
+        "overlay",
+        "keyboard"
+    ],
+    "vendor": {
+        "js": [
+            "jquery/hz/fadeThenRemove/js/fadeThenRemove.js",
+            "jquery/hz/inputFocus/js/inputFocus.js"
+        ]
+    }
+}

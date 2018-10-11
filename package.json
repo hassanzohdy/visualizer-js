@@ -1,0 +1,39 @@
+{
+  "name": "visualizer",
+  "version": "1.0.0",
+  "description": "Visualizer Js Framework",
+  "main": "''",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "''"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/hassan_zohdy/visualizer.git"
+  },
+  "keywords": [
+    "visaulizer",
+    "framework",
+    "js"
+  ],
+  "author": "Hasan Zohdy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/hassan_zohdy/visualizer/issues"
+  },
+  "homepage": "https://gitlab.com/hassan_zohdy/visualizer#README",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-minify": "^0.4.3"
+  },
+  "dependencies": {
+    "es6-shim": "^0.35.3",
+    "es7-shim": "^6.0.0",
+    "proxy-polyfill": "^0.3.0"
+  }
+}

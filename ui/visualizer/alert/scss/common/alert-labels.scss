@@ -1,0 +1,47 @@
+@if global-variable-exists(mainColor) {
+  } @else {
+    $mainColor: #2196F3;
+}
+
+$alertLabels: (
+    dark: (
+        color: #333,
+        foregroundColor: #FFF
+    ),
+    gray: (
+        color: #ccc,
+        foregroundColor: #333
+    ),
+    info: (
+        color: #03A9F4,
+        foregroundColor: #FFF
+    ),
+    primary: (
+        color: $mainColor,
+        foregroundColor: #FFF
+    ),
+    info: (
+        color: #FF1414,
+        foregroundColor: #FFF
+    ),
+    pink: (
+        color: #ff0790,
+        foregroundColor: #FFF
+    ),
+    teal: (
+        color: #009688,
+        foregroundColor: #FFF
+    ),
+    warning: (
+        color: #FF9900,
+        foregroundColor: #FFF
+    ),
+    success: (
+        color: #58D558,
+        foregroundColor: #FFF
+    ),
+    purple: (
+        color: #b916b9,
+        foregroundColor: #FFF
+    )
+);

@@ -1,0 +1,12 @@
+{
+    "presets": [
+        [
+            "minify",
+            {
+                "removeConsole": true,
+                "mangle": false,
+                "evaluate": false
+            }
+        ]
+    ]
+}

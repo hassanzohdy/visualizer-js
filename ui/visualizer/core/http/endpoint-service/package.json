@@ -1,0 +1,6 @@
+{
+    "name": "core/http/endpoint-service",
+    "dependencies": [
+        "core/http/endpoint"
+    ]
+}

@@ -1,0 +1,6 @@
+{
+    "name": "core/view",
+    "dependencies": [
+        "core/application"
+    ]
+}

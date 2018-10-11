@@ -1,0 +1,11 @@
+.animated {
+    &.slow {
+        animation-duration: 3s !important;
+    }
+    &.normal {
+        animation-duration: 1.5s !important;
+    }
+    &.speedy {
+        animation-duration: 0.3s !important;
+    }                          
+}

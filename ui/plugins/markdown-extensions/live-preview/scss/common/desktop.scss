@@ -1,0 +1,16 @@
+.markdown-live-preview-container {
+    min-height: 100vh;
+    textarea {
+        resize: none;
+        height: 100%;
+    }
+    .live-preview-displayer {
+        background: $bodyBackground;
+    }
+    h1 {
+        font-weight: bold;
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+}

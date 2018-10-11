@@ -1,0 +1,14 @@
+{
+    "name": "visualizer",
+    "version": 1.0,
+    "dependencies": [
+        "core",
+        "cache",
+        "locale",
+        "bootstrap",
+        "dom",
+        "form"
+    ],
+    "plugins": [
+    ]
+}

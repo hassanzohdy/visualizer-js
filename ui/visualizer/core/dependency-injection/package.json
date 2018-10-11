@@ -1,0 +1,6 @@
+{
+    "name": "core/dependency-injection",
+    "dependencies": [
+        "support"
+    ]
+}

@@ -1,0 +1,9 @@
+{
+    "name": "material",
+    "version": 1.0,
+    "components": [
+        "material/material",
+        "material/icons",
+        "material/buttons"
+    ]
+}

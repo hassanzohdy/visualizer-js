@@ -1,0 +1,14 @@
+{
+    "name": "alert/sweetalert",
+    "type": "plugin",
+    "vendor": {
+        "js": [
+            "javascript/sweetalert2/js/sweetalert2.all.min.js"
+        ],
+        "css": {
+            "common": [
+                "javascript/sweetalert2/css/sweetalert2.min.css"
+            ]
+        }
+    }
+}

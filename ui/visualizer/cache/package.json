@@ -1,0 +1,6 @@
+{
+    "name": "cache",
+    "dependencies": [
+        "crypto"
+    ]
+}

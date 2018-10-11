@@ -1,0 +1,18 @@
+{
+    "name": "core",
+    "dependencies": [
+        "core/dependency-injection",
+        "jquery",
+        "support"
+    ],
+    "components": [
+        "core/config",
+        "core/dynamic",
+        "core/application",
+        "core/http",
+        "core/router",
+        "core/layout",
+        "core/events",
+        "core/view"
+    ]
+}

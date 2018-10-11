@@ -1,0 +1,15 @@
+.confirm-content {
+    text-align: right;
+}
+
+.confirm-content .confirm-heading .heading-text {
+    margin-left: 10px;
+}
+
+.confirm-content .confirm-buttons {
+    text-align: left;
+}
+
+.confirm-content .confirm-buttons .cancel-button {
+    margin-left: 10px;
+}

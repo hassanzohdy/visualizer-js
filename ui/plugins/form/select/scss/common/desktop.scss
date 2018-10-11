@@ -1,0 +1,49 @@
+.select2-container {
+    width: 100% !important;
+    .select2-container--default {
+        // the displayed box
+        .select2-selection--single {
+            border: 1px solid #ced4da;
+            border-radius: .25rem;
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+            padding: .375rem .75rem;
+            line-height: 1.5;
+            height: 5.6vh; 
+            // styling the arrow
+            .select2-selection__arrow {}
+            
+            // styling the displayed selected item
+            .select2-selection__rendered {
+                line-height: 1;
+            }
+        } 
+        // in case the select options has images
+        .select2-image-container {
+            font-weight: bold;
+            .select2-img {
+                $dimension: 20px;
+                width: $dimension;
+                height: $dimension;
+                margin-right: 0.5rem;
+            }
+        }
+    } 
+    // dropdown list 
+    .select2-dropdown {
+        // results list 
+        .select2-results__options {
+            // selected option styling
+            .select2-results__option--highlighted[aria-selected] {
+                background-color: #e2e2e2;
+                color: #333;
+            }
+        } 
+        // search input 
+        .select2-search__field {
+            &:focus {
+                border-color: #666;
+                outline: none;
+            }
+        }
+    }
+}

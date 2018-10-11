@@ -1,0 +1,9 @@
+{
+    "name": "support",
+    "components": [
+        "support/objectMethodDefiner",
+        "support/javascript",
+        "support/helpers",
+        "support/is"
+    ]
+}

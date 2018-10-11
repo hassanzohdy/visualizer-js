@@ -1,0 +1,6 @@
+{
+    "name": "session",
+    "dependencies": [
+        "cache"
+    ]
+}
