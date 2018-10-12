@@ -119,6 +119,12 @@ abstract class Command
      */
     public static function __callStatic($color, $args)
     {
+        if (strpos($color, 'inline') === 0) {
+            $color = strtolower(str_remove_start($color, 'inline'));
+
+            return Console::$color(...$args);
+        }
+
         Console::newLine(
             Console::$color(...$args)
         );

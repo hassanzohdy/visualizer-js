@@ -62,7 +62,7 @@ class NewPage extends Command
             return static::error(sprintf('%s page already exists!', $pageName));
         }
 
-        static::yellow(sprintf('Creating %s page', $pageName));
+        static::normal(sprintf('Creating %s page', static::inlinePurple($pageName)));
 
         $this->className = implode('', array_map('ucFirst', explode('-', $pageName)));
 

@@ -24,7 +24,7 @@ class NewApplication extends Command
             return static::error(sprintf('%s application already exists', $appName));
         }
 
-        static::green('Crafting Application....');
+        static::green('Crafting '. static::inlineBold($appName) .' Application....');
 
         $this->createAppConfig($appName, $config);
 
