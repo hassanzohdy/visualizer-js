@@ -11,7 +11,8 @@
  * (C) Jesse Donat https://github.com/donatj
  */
 namespace System;
- class Console
+
+class Console
 {
     static $foreground_colors = array(
         'bold' => '1', 'dim' => '2',
@@ -111,14 +112,25 @@ namespace System;
         echo str_repeat("\007", $count);
     }
 
+    /**
+     * Display an error message then exist the cli
+     * 
+     * @param  string $message
+     * @return void
+     */
+    public static function error(string $message)
+    {
+        static::newLine(static::red($message));
+        exit;
+    }
 
     /**
      * Create new line
-     * 
+     *
      * @param string $string
      * @return void
      */
-    public static function newLine($string) 
+    public static function newLine($string)
     {
         echo $string . "\r\n";
     }

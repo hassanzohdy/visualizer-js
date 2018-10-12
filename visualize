@@ -1,5 +1,15 @@
 #!/usr/bin/env php
 <?php
+
+set_time_limit(0);
+
+use System\Application;
+use System\Console;
+use System\File;
+
+// declare the application variable
+$app = null;
+
 $optionsList = $argv;
 
 // remove first one as its the file name
@@ -7,195 +17,46 @@ array_shift($optionsList);
 
 $command = array_shift($optionsList);
 
-if ($command === 'install') {
-    if (file_exists($installedFile = 'vendor/System/storage/visualizer/installed')) {
-        die('Framework is already installed!');
-    } else {
-        if (! function_exists('system')) {
-            die("Can't install Visualizer automatically, system function must be enabled");
-        } else {
-            copy('vendor/System/copied/loader.json', 'ui/loader.json');
-            mkdir('ui/apps');
-            mkdir('vendor/System/storage/visualizer');
-            rename('config.json.sample', 'config.json');
-            system('composer install');
-            touch($installedFile);
-            system('php visualize new blog --path=/');
-        }
-    }
+$commandsList = [
+    'install' => System\CLI\Commands\Install::class,
+    'new:page' => System\CLI\Commands\NewPage::class,
+    'new:app' => System\CLI\Commands\NewApplication::class,
+    'build' => System\CLI\Commands\BuildApplication::class,
+    'produce' => System\CLI\Commands\ProduceApplication::class,
+];
 
-    die;
+if ($command == 'install') {
+    require 'vendor/System/Console.php';
+    require 'vendor/System/CLI/Command.php';
+    require 'vendor/System/CLI/Commands/Install.php';
+} else {
+    require __DIR__ . '/vendor/autoload.php';
+
+    $file = new File(__DIR__);
+    $app = Application::getInstance($file);
 }
 
-require __DIR__ . '/vendor/autoload.php';
-
-set_time_limit(0);
-
-use Symfony\Component\Filesystem\Filesystem;
-use System\Application;
-use System\Console;
-use System\File;
-
-
-$file = new File(__DIR__);
-$app = Application::getInstance($file);
+if (!isset($commandsList[$command])) {
+    Console::error(sprintf('Call to undefined command %s', $command));
+}
 
 try {
-    if ($command == 'build') {
-        $appName = array_shift($optionsList);
+    $commandObject = new $commandsList[$command]($optionsList, $app);
 
-        if (!$appName) {
-            Console::newLine(
-                Console::red('Please write down the application name!')
-            );
-            die;
-        }
-        build($appName);
-    } elseif ($command == 'produce') {
-        Console::newLine(
-            Console::yellow('Building...')
-        );
+    $commandObject->execute();
 
-        $appName = array_shift($optionsList);
-
-        if (!$appName) {
-            Console::newLine(
-                Console::red('Please write down the application name!')
-            );
-        }
-
-        $app->ui->buildApp($appName)->produce();
-
-        Console::newLine(
-            Console::green('Build Completed!')
-        );
-
-        Console::newLine(
-            Console::yellow('Compiling...')
-        );
-
-        $app->ui->compileForProduction();
-
-        Console::newLine(
-            Console::green('App has been compiled successfully Completed!')
-        );
-
-        Console::bell();
-    } elseif ($command == 'new') {
-        $appName = array_shift($optionsList);
-
-        $config = json_decode(file_get_contents('config.json'));
-
-        if (!$config) {
-            Console::newLine(
-                Console::red('Invalid config.json syntax file')
-            );
-            die;
-        }
-        if (isset($config->apps->$appName)) {
-            Console::newLine(
-                Console::red(sprintf('%s application already exists', $appName))
-            );
-            die;
-        }
-        Console::newLine(
-            Console::green('Crafting Application....')
-        );
-
-        createAppConfig($appName, $config, $optionsList);
-
-        file_put_contents('config.json', json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-
-        // now copy the default application structure to that directory
-        $fs = new FileSystem;
-
-        $fs->mirror($file->to('vendor/System/copied/ui-app'), $appPath = $file->to('ui/apps/' . $appName));
-
-        // update the package.json file to add the application name
-        $appPackage = json_decode(file_get_contents($appPath . '/package.json'));
-
-        $appPackage->name = $appName;
-
-        file_put_contents($appPath . '/package.json', json_encode($appPackage, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-
-        // create new empty assets/images directory in the application directory
-        mkdir('ui/apps/' . $appName . '/assets/images', 0777, true);
-
-        build($appName);
-    } else {
-        echo 'Call to undefined command ' . $command;
-    }
+    $commandObject->done();
 } catch (Exception $e) {
-    die($e->getMessage() . ' in ' . $e->getFile() . ' ' . $e->getLine());
-}
+    echo ("\r\n" . $e->getMessage() . ' in ' . $e->getFile() . ' ' . $e->getLine());
 
-/**
- * Create application configurations
- *
- * @param  string $appName
- * @param  object $config
- * @param  array $optionsList
- * @return void
- */
-function createAppConfig($appName, $config, $optionsList)
-{
-    $options = [];
-    foreach ($optionsList as $option) {
-        list($optionName, $optionValue) = explode('=', $option);
-        $optionName = str_remove_start($optionName, '--');
-        if ($optionName == 'path' && $optionValue[0] != '/') {
-            $optionValue = "/$optionValue";
+    echo "\r\nError Trace\r\n\r\n";
+    foreach ($e->getTrace() as $trace) {
+        if (isset($trace['class'])) {
+            echo $trace['class'] . ':' . $trace['function'];
+        } elseif (isset($trace['function'])) {
+            echo $trace['function'];
         }
-        $options[$optionName] = $optionValue;
+
+        echo ' ' . $trace['file'] . ' ' . $trace['line'] . "\r\n";
     }
-    
-    $config->apps->$appName = (object) array_merge([
-        'path' => '/' . $appName,
-        'locale' => 'en',
-        'title' => [
-            'en' => ucfirst($appName),
-        ],
-        'locales' => ['en'],
-    ], $options);
-
-    // make sure the application with the / prefix be at the bottom of the list
-
-    $newAppsList = new stdClass;
-    $mainApp = null;
-    $mainAppName = null;
-
-    foreach ($config->apps as $appName => $app) {
-        if ($app->path != '/') {
-            $newAppsList->$appName = $app;
-        } else {
-            $mainApp = $app;
-            $mainAppName = $appName;
-        }
-    }
-
-    $config->apps = $newAppsList;
-
-    if ($mainAppName) {
-        $config->apps->$mainAppName = $mainApp;
-    }
-}
-
-/**
- * Build the given application name
- *
- * @param  string $appName
- * @return void
- */
-function build($appName)
-{
-    Console::newLine(
-        Console::yellow('Building...')
-    );
-    
-    app()->ui->buildApp($appName)->env('development')->forceRebuild(true)->run();
-    Console::newLine(
-        Console::green('Build Completed!')
-    );
-
-    Console::bell();
 }
