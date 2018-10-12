@@ -5,9 +5,9 @@ public/static/
 node_modules
 ui/apps/
 ui/loader.json
-config.json
-composer.lock
-package-lock.json
+/config.json
+/composer.lock
+/package-lock.json
 
 vendor/*
 # Ignore all vendors except the system
