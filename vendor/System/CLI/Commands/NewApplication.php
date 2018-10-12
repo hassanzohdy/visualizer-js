@@ -69,16 +69,20 @@ class NewApplication extends Command
         $options = [];
 
         // --path=/admin
-        $path = $this->flag('path', "/$appName");
-        
+        $path = static::flag('path', "/$appName");
+       
+        if ($path[0] != '/') {
+            $path = "/$path";
+        }
+            
         // --locale=en
-        $defaultLocaleCode = $this->flag('locale', 'en');
+        $defaultLocaleCode = static::flag('locale', 'en');
 
         // --locales=en,ar,fr
-        $locales = explode(',', $this->flag('locales', 'en'));
+        $locales = explode(',', static::flag('locales', 'en'));
 
         // --title=en:MyEnAppTitle,MyArAppTitle
-        $titles = $this->flag('title', "en:$appName");
+        $titles = static::flag('title', "en:$appName");
 
         $titles = explode(',', $titles);
         $titlesList = [];

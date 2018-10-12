@@ -1,9 +1,9 @@
 <?php
 namespace System\CLI\Commands;
 
-use Symfony\Component\Filesystem\Filesystem;
+use System\CLI\Config;
 use System\CLI\Command;
-
+use Symfony\Component\Filesystem\Filesystem;
 class NewPage extends Command
 {
     /**
@@ -58,7 +58,9 @@ class NewPage extends Command
             }
         }
 
-        $appName = $this->flag('app', $defaultApp);
+        $defaultApp = Config::get('default-app');
+
+        $appName = static::flag('app', $defaultApp);
 
         $totalCreatedPages = 0;
 
@@ -100,7 +102,7 @@ class NewPage extends Command
             static::green(sprintf('%s has been created successfully!', $totalCreatedPages == 1 ? $pageName . ' page' : $totalCreatedPages . ' pages'));
 
             // rebuild the application again
-            if ($this->flag('rebuild') !== 'false') {
+            if (static::flag('rebuild') !== 'false') {
                 system("php visualize build $appName --silent");
             }
         }
@@ -134,7 +136,7 @@ class NewPage extends Command
      */
     private function createHtmlFile(string $pageName)
     {
-        $pageContent = $this->flag('content', "<h1 class=\"text-center\">{$pageName} Page</h1>");
+        $pageContent = static::flag('content', "<h1 class=\"text-center\">{$pageName} Page</h1>");
 
         file_put_contents($this->pageComponentPath . '/html/page.html', $pageContent);
     }
@@ -170,7 +172,7 @@ class NewPage extends Command
     {
         $routingJs = file($routingJsPath = "ui/apps/{$this->appName}/components/routing.js");
 
-        $route = $this->flag('route', "/$pageName");
+        $route = static::flag('route', "/$pageName");
 
         $lines = '';
 

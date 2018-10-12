@@ -3,9 +3,10 @@
 
 set_time_limit(0);
 
-use System\Application;
-use System\Console;
 use System\File;
+use System\Console;
+use System\CLI\Config;
+use System\Application;
 
 // declare the application variable
 $app = null;
@@ -23,10 +24,13 @@ $commandsList = [
     'new:app' => System\CLI\Commands\NewApplication::class,
     'build' => System\CLI\Commands\BuildApplication::class,
     'produce' => System\CLI\Commands\ProduceApplication::class,
+    'global' => System\CLI\Commands\GlobalConfigurations::class,
 ];
 
 if ($command == 'install') {
+    require 'vendor/System/helpers.php';
     require 'vendor/System/Console.php';
+    require 'vendor/System/CLI/Config.php';
     require 'vendor/System/CLI/Command.php';
     require 'vendor/System/CLI/Commands/Install.php';
 } else {
@@ -42,6 +46,10 @@ if (!isset($commandsList[$command])) {
 
 try {
     $commandObject = new $commandsList[$command]($optionsList, $app);
+
+    if ($command != 'install') {
+        Config::init();
+    }
 
     $commandObject->execute();
 

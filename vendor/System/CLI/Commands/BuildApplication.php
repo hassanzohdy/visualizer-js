@@ -17,6 +17,12 @@ class BuildApplication extends Command
             return static::error('Please write down the application name!');
         }
 
+        $config = $this->jsonFile('config.json');
+
+        if (! isset($config->apps->$appName)) {
+            return static::error(sprintf('%s does not exists!', $appName));
+        }
+
         static::yellow('Building application...');
         
         static::build($appName);

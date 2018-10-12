@@ -1,8 +1,8 @@
 <?php
 namespace System\CLI;
 
-use System\Application;
 use System\Console;
+use System\Application;
 
 abstract class Command
 {
@@ -25,7 +25,7 @@ abstract class Command
      *
      * @var array
      */
-    protected $flags = [];
+    protected static $flags = [];
 
     /**
      * Constructor
@@ -38,7 +38,7 @@ abstract class Command
         $this->app = $app;
         $this->optionsList = $optionsList;
 
-        $this->collectFlags();
+        static::collectFlags($this->optionsList);
     }
 
     /**
@@ -48,9 +48,9 @@ abstract class Command
      *
      * @return void
      */
-    private function collectFlags()
+    private static function collectFlags(& $optionsList)
     {
-        foreach ($this->optionsList as $key => $option) {
+        foreach ($optionsList as $key => $option) {
             if (strpos($option, '--') === 0) {
                 $optionValue = explode('=', $option);
 
@@ -64,10 +64,16 @@ abstract class Command
 
                 $optionName = str_remove_start($optionName, '--');
 
-                $this->flags[$optionName] = implode('=', $optionValue);
+                $optionValue = trim(implode('=', $optionValue));
+
+                if ($optionValue === 'false') {
+                    $optionValue = false;
+                }
+
+                static::$flags[$optionName] = $optionValue;
 
                 // remove the flag from the list 
-                unset($this->optionsList[$key]);
+                unset($optionsList[$key]);
             } 
         }
     }
@@ -79,11 +85,11 @@ abstract class Command
      */
     public function done()
     {
-        if (! $this->flag('silent')) {
+        if (! static::flag('silent')) {
             Console::bell();
         }
     }
-    
+
     /**
      * Get a flag value or return the default given value
      *
@@ -91,9 +97,20 @@ abstract class Command
      * @param  mixed $defaultValue
      * @return mixed
      */
-    protected function flag(string $flagName, $defaultValue = null)
+    protected static function flag(string $flagName, $defaultValue = null)
     {
-        return $this->flags[$flagName] ?? $defaultValue;
+        return static::$flags[$flagName] ?? 
+               (Config::get($flagName) ?: $defaultValue);
+    }
+
+    /**
+     * Get all flags list
+     * 
+     * @return array
+     */
+    protected static function flagsList(): array
+    {
+        return static::$flags;
     }
 
     /**
@@ -137,56 +154,17 @@ abstract class Command
         if (strpos($color, 'inline') === 0) {
             $color = strtolower(str_remove_start($color, 'inline'));
 
-            if (! static::hasColorSupport()) {
+            if (! static::flag('colored')) {
                 return $args[0];
             }
 
             return Console::$color(...$args);
         }
 
-        $text = static::hasColorSupport() ? Console::$color(...$args) : $args[0];
+        $text = static::flag('colored') ? Console::$color(...$args) : $args[0];
 
         Console::newLine(
             $text
         );
-    }
-
-        /**
-     * Returns true if the stream supports colorization.
-     *
-     * Colorization is disabled if not supported by the stream:
-     *
-     * This is tricky on Windows, because Cygwin, Msys2 etc emulate pseudo
-     * terminals via named pipes, so we can only check the environment.
-     *
-     * Reference: Composer\XdebugHandler\Process::supportsColor
-     * https://github.com/composer/xdebug-handler
-     *
-     * @return bool true if the stream supports colorization, false otherwise
-     */
-    protected static function hasColorSupport()
-    {
-        if ('Hyper' === getenv('TERM_PROGRAM')) {
-            return true;
-        }
-
-        $stream = fopen('php://stdout', 'w');
-
-        if (\DIRECTORY_SEPARATOR === '\\') {
-            return (\function_exists('sapi_windows_vt100_support')
-                && @sapi_windows_vt100_support($stream))
-                || false !== getenv('ANSICON')
-                || 'ON' === getenv('ConEmuANSI')
-                || 'xterm' === getenv('TERM');
-        }
-        if (\function_exists('stream_isatty')) {
-            return @stream_isatty($stream);
-        }
-        if (\function_exists('posix_isatty')) {
-            return @posix_isatty($stream);
-        }
-        $stat = @fstat($stream);
-        // Check if formatted mode is S_IFCHR
-        return $stat ? 0020000 === ($stat['mode'] & 0170000) : false;
     }
 }
