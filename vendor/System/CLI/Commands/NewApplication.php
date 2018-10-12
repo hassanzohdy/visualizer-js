@@ -50,8 +50,8 @@ class NewApplication extends Command
         // create default pages
         mkdir('ui/apps/' . $appName . '/components/pages', 0777, true);
         
-        system('php visualize new:page home --app='. $appName .' --silent --rebuild=false --content="<h1 class=\\"text-center\\">Visualizer JS</h1>');
-        system('php visualize new:page not-found --app='. $appName .' --silent --rebuild=false --content="<h1 class=\\"text-center\\">Not Found Page</h1>');
+        system('php visualize new:page not-found --route=* --app='. $appName .' --silent --rebuild=false --content="<h1 class=\\"text-center\\">Not Found Page</h1>');
+        system('php visualize new:page home --route=/ --app='. $appName .' --silent --rebuild=false --content="<h1 class=\\"text-center\\">Visualizer JS</h1>');
         
         // now build the application
         system("php visualize build $appName --silent");

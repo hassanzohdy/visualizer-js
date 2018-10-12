@@ -50,7 +50,7 @@ abstract class Command
      */
     private function collectFlags()
     {
-        foreach ($this->optionsList as $option) {
+        foreach ($this->optionsList as $key => $option) {
             if (strpos($option, '--') === 0) {
                 $optionValue = explode('=', $option);
 
@@ -65,6 +65,9 @@ abstract class Command
                 $optionName = str_remove_start($optionName, '--');
 
                 $this->flags[$optionName] = implode('=', $optionValue);
+
+                // remove the flag from the list 
+                unset($this->optionsList[$key]);
             } 
         }
     }

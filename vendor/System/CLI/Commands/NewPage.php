@@ -1,29 +1,35 @@
 <?php
 namespace System\CLI\Commands;
 
-use stdClass;
-use System\CLI\Command;
 use Symfony\Component\Filesystem\Filesystem;
+use System\CLI\Command;
 
 class NewPage extends Command
 {
     /**
+     * Application name
+     *
+     * @var string
+     */
+    private $appName;
+
+    /**
      * Page component path
-     * 
+     *
      * @var string
      */
     private $pageComponentPath;
 
     /**
      * Page Class name
-     * 
+     *
      * @var string
      */
     private $className;
 
     /**
      * Page name alias
-     * 
+     *
      * @var string
      */
     private $pageNameAlias;
@@ -33,13 +39,15 @@ class NewPage extends Command
      */
     public function execute()
     {
-        $pageName = array_shift($this->optionsList);
+        $pages = $this->optionsList;
 
-        if (!$pageName) {
+        if (!$pages) {
             return static::error('Please write down the page name!');
-        }  
+        }
 
         $config = $this->jsonFile('config.json');
+
+        $fs = new FileSystem;
 
         $defaultApp = '';
 
@@ -52,51 +60,62 @@ class NewPage extends Command
 
         $appName = $this->flag('app', $defaultApp);
 
-        if (! $appName) {
+        $totalCreatedPages = 0;
+
+        if (!$appName) {
             return static::error('Please provide app name using the --app=myAppName flag');
         }
-        
-        $this->pageComponentPath = "ui/apps/{$appName}/components/pages/{$pageName}";
 
-        if (is_dir($this->pageComponentPath)) {
-            return static::error(sprintf('%s page already exists!', $pageName));
+        $this->appName = $appName;
+
+        foreach ($pages as $pageName) {
+            $this->pageComponentPath = "ui/apps/{$appName}/components/pages/{$pageName}";
+
+            if (is_dir($this->pageComponentPath)) {
+                static::red(sprintf('%s page already exists!', $pageName));
+                continue;
+            }
+
+            static::normal(sprintf('Creating %s page', static::inlinePurple($pageName)));
+
+            $this->className = implode('', array_map('ucFirst', explode('-', $pageName)));
+
+            $this->pageNameAlias = lcfirst($this->className);
+
+            // first we will copy the page component
+
+            $fs->mirror('vendor/System/copied/ui-page', $this->pageComponentPath);
+
+            // now we will update all files to replace the placeholder with the page name
+            // update js file
+            $this->createJsFile($pageName);
+            $this->createHtmlFile($pageName);
+            $this->createScssFiles($pageName);
+            $this->addPageRoute($pageName);
+
+            $totalCreatedPages++;
         }
 
-        static::normal(sprintf('Creating %s page', static::inlinePurple($pageName)));
+        if ($totalCreatedPages > 0) {
+            static::green(sprintf('%d pages has been created successfully!', $totalCreatedPages));
 
-        $this->className = implode('', array_map('ucFirst', explode('-', $pageName)));
-
-        $this->pageNameAlias = lcfirst($this->className);
-       
-        // first we will copy the page component 
-        $fs = new FileSystem;
-
-        $fs->mirror('vendor/System/copied/ui-page', $this->pageComponentPath);
-
-        // now we will update all files to replace the placeholder with the page name
-        // update js file
-        $this->createJsFile($pageName);
-        $this->createHtmlFile($pageName);
-        $this->createScssFiles($pageName);    
-
-        // rebuild the application again
-        if ($this->flag('rebuild') !== 'false') {
-            system("php visualize build $appName --silent");
+            // rebuild the application again
+            if ($this->flag('rebuild') !== 'false') {
+                system("php visualize build $appName --silent");
+            }
         }
-
-        static::green(sprintf('%s page has been created successfully!', $pageName));
     }
 
     /**
      * Create the js file
-     * 
+     *
      * @param  string $pageName
      * @return void
      */
     private function createJsFile(string $pageName)
     {
         $jsFile = file_get_contents($this->pageComponentPath . '/js/Page.js');
-              
+
         $jsFile = str_replace('class placeholder', "class {$this->className}Page", $jsFile);
 
         $jsFile = str_replace("this.name = 'placeholder';", "this.name = '{$this->pageNameAlias}';", $jsFile);
@@ -109,7 +128,7 @@ class NewPage extends Command
 
     /**
      * Create html file
-     * 
+     *
      * @param  string $pageName
      * @return void
      */
@@ -122,7 +141,7 @@ class NewPage extends Command
 
     /**
      * Create scss files
-     * 
+     *
      * @param  string $pageName
      * @return void
      */
@@ -133,11 +152,38 @@ class NewPage extends Command
                 $devicePath = "{$this->pageComponentPath}/scss/$direction/$device.scss";
 
                 $deviceContent = file_get_contents($devicePath);
-    
+
                 $deviceContent = str_replace('placeholder', $this->pageNameAlias, $deviceContent);
 
                 file_put_contents($devicePath, $deviceContent);
             }
         }
+    }
+
+    /**
+     * Add page route to routes list
+     * 
+     * @param  string $pageName
+     * @return void
+     */
+    private function addPageRoute(string $pageName)
+    {
+        $routingJs = file($routingJsPath = "ui/apps/{$this->appName}/components/routing.js");
+
+        $route = $this->flag('route', "/$pageName");
+
+        $lines = '';
+
+        foreach ($routingJs as $line) {
+            $lines .= $line;
+            
+            if (strpos($line, "// add your routes") !== false) {
+                $lines .= PHP_EOL;
+                $lines .= "    // $pageName page" . PHP_EOL;    
+                $lines .= "    router.add('$route', {$this->className}Page);" . PHP_EOL;    
+            }
+        }
+
+        file_put_contents($routingJsPath, $lines);
     }
 }
