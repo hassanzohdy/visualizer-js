@@ -24,8 +24,6 @@ class Install extends Command
                 system('composer install');
                 touch($installedFile);
                 system('php visualize new:app blog --silent --path=/');
-                system('php visualize new:page home --silent --content="<h1 class=\\"text-center\\">Visualizer JS</h1>');
-                system('php visualize new:page not-found --silent --content="<h1 class=\\"text-center\\">Not Found Page</h1>');
             }
         }
     }
