@@ -97,7 +97,7 @@ class NewPage extends Command
         }
 
         if ($totalCreatedPages > 0) {
-            static::green(sprintf('%d pages has been created successfully!', $totalCreatedPages));
+            static::green(sprintf('%s has been created successfully!', $totalCreatedPages == 1 ? $pageName . ' page' : $totalCreatedPages . ' pages'));
 
             // rebuild the application again
             if ($this->flag('rebuild') !== 'false') {

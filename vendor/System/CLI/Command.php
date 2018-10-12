@@ -73,6 +73,18 @@ abstract class Command
     }
 
     /**
+     * Ring the bill when the command is done
+     * 
+     * @return void
+     */
+    public function done()
+    {
+        if (! $this->flag('silent')) {
+            Console::bell();
+        }
+    }
+    
+    /**
      * Get a flag value or return the default given value
      *
      * @param  string $flagName
@@ -121,27 +133,60 @@ abstract class Command
      * @return void
      */
     public static function __callStatic($color, $args)
-    {
+    {   
         if (strpos($color, 'inline') === 0) {
             $color = strtolower(str_remove_start($color, 'inline'));
+
+            if (! static::hasColorSupport()) {
+                return $args[0];
+            }
 
             return Console::$color(...$args);
         }
 
+        $text = static::hasColorSupport() ? Console::$color(...$args) : $args[0];
+
         Console::newLine(
-            Console::$color(...$args)
+            $text
         );
     }
 
-    /**
-     * Ring the bill when the command is done
-     * 
-     * @return void
+        /**
+     * Returns true if the stream supports colorization.
+     *
+     * Colorization is disabled if not supported by the stream:
+     *
+     * This is tricky on Windows, because Cygwin, Msys2 etc emulate pseudo
+     * terminals via named pipes, so we can only check the environment.
+     *
+     * Reference: Composer\XdebugHandler\Process::supportsColor
+     * https://github.com/composer/xdebug-handler
+     *
+     * @return bool true if the stream supports colorization, false otherwise
      */
-    public function done()
+    protected static function hasColorSupport()
     {
-        if (! $this->flag('silent')) {
-            Console::bell();
+        if ('Hyper' === getenv('TERM_PROGRAM')) {
+            return true;
         }
+
+        $stream = fopen('php://stdout', 'w');
+
+        if (\DIRECTORY_SEPARATOR === '\\') {
+            return (\function_exists('sapi_windows_vt100_support')
+                && @sapi_windows_vt100_support($stream))
+                || false !== getenv('ANSICON')
+                || 'ON' === getenv('ConEmuANSI')
+                || 'xterm' === getenv('TERM');
+        }
+        if (\function_exists('stream_isatty')) {
+            return @stream_isatty($stream);
+        }
+        if (\function_exists('posix_isatty')) {
+            return @posix_isatty($stream);
+        }
+        $stat = @fstat($stream);
+        // Check if formatted mode is S_IFCHR
+        return $stat ? 0020000 === ($stat['mode'] & 0170000) : false;
     }
 }
