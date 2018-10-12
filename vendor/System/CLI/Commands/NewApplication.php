@@ -49,6 +49,10 @@ class NewApplication extends Command
 
         // now build the application
         BuildApplication::build($appName);
+        
+        // create default pages
+        system('php visualize new:page home --silent --content="<h1 class=\\"text-center\\">Visualizer JS</h1>');
+        system('php visualize new:page not-found --silent --content="<h1 class=\\"text-center\\">Not Found Page</h1>');
     }
 
     /**
