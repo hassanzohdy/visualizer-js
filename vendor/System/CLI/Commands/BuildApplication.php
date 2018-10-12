@@ -28,10 +28,10 @@ class BuildApplication extends Command
      */
     public static function build(string $appName)
     {
-        static::yellow('Building...');
+        static::yellow('Building application...');
         
         app()->ui->buildApp($appName)->env('development')->forceRebuild(true)->run();
 
-        static::green('Build Completed!');
+        static::green('Application Build has been completed successfully!');
     }
 }

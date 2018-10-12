@@ -79,6 +79,9 @@ class NewPage extends Command
         $this->createHtmlFile($pageName);
         $this->createScssFiles($pageName);    
 
+        // rebuild the application again
+        system("php visualize build $appName --silent");
+
         static::green(sprintf('%s page has been created successfully!', $pageName));
     }
 
