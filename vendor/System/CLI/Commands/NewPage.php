@@ -80,7 +80,9 @@ class NewPage extends Command
         $this->createScssFiles($pageName);    
 
         // rebuild the application again
-        system("php visualize build $appName --silent");
+        if ($this->flag('rebuild') !== 'false') {
+            system("php visualize build $appName --silent");
+        }
 
         static::green(sprintf('%s page has been created successfully!', $pageName));
     }

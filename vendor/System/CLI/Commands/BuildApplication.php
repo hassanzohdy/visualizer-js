@@ -17,7 +17,11 @@ class BuildApplication extends Command
             return static::error('Please write down the application name!');
         }
 
+        static::yellow('Building application...');
+        
         static::build($appName);
+
+        static::green('Application Build has been completed successfully!');
     }
 
     /**
@@ -28,10 +32,6 @@ class BuildApplication extends Command
      */
     public static function build(string $appName)
     {
-        static::yellow('Building application...');
-        
         app()->ui->buildApp($appName)->env('development')->forceRebuild(true)->run();
-
-        static::green('Application Build has been completed successfully!');
     }
 }
