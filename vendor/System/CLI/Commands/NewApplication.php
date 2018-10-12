@@ -47,11 +47,11 @@ class NewApplication extends Command
         // create new empty assets/images directory in the application directory
         mkdir('ui/apps/' . $appName . '/assets/images', 0777, true);
 
+        // create default pages
+        mkdir('ui/apps/' . $appName . '/components/pages', 0777, true);
         // now build the application
         BuildApplication::build($appName);
         
-        // create default pages
-        mkdir('ui/apps/' . $appName . '/components/pages', 0777, true);
         system('php visualize new:page home --silent --content="<h1 class=\\"text-center\\">Visualizer JS</h1>');
         system('php visualize new:page not-found --silent --content="<h1 class=\\"text-center\\">Not Found Page</h1>');
     }
