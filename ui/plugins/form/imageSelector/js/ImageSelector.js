@@ -52,7 +52,7 @@ class ImageSelector extends Form.Plugin {
      */
     macro(selector, options = {}) {
         return this.plugin('imageSelector').run(this.find(selector || '.image-file-input'), Object.merge({
-            imagePlaceholder: Config.get('form.plugins.imageSelector.imagePlaceholder'),
+            imagePlaceholder: Config.get('form.imageSelector.imagePlaceholder'),
         }, options));
     }
 }
