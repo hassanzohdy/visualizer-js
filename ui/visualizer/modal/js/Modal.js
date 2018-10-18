@@ -35,7 +35,15 @@ class Modal {
             }
 
             if (Is.object(this.options.animation) && this.options.animation.show) {
-                this.modalFactory.animator.animate(this.modalDialog, this.options.animation.show);
+                let animation = this.options.animation.show,
+                    speed = Animator.NORMAL_SPEED;
+
+                if (Is.object(this.options.animation.show)) {
+                    animation = this.options.animation.show.name;
+                    speedMode = this.options.animation.show.speed;
+                }
+
+                this.modalFactory.animator.animate(this.modalDialog, animation, speed);
             }
         });
 
@@ -52,7 +60,15 @@ class Modal {
             }
 
             if (Is.object(this.options.animation) && this.options.animation.hide) {
-                this.modalFactory.animator.animate(this.modalDialog, this.options.animation.hide).then(() => {
+                let animation = this.options.animation.hide,
+                    speed = Animator.NORMAL_SPEED;
+
+                if (Is.object(this.options.animation.hide)) {
+                    animation = this.options.animation.hide.name;
+                    speedMode = this.options.animation.hide.speed;
+                }
+
+                this.modalFactory.animator.animate(this.modalDialog, animation, speed).then(() => {
                     // hide and remove the backdrop manually
                     this.element.hide();
                     $('.modal-backdrop').hide();
