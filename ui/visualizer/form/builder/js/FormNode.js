@@ -374,7 +374,7 @@ class FormNode {
      */
     static build(attributes) {
         if (attributes.name && !attributes.id && Is.validHtmlId(attributes.name)) {
-            attributes.id = attributes.name;
+            attributes.id = attributes.name + '_' + Random.id();
         }
 
         let tag = 'input';
