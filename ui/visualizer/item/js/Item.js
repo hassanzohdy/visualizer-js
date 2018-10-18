@@ -49,6 +49,8 @@ class Item extends Dynamic {
      * {@inheritDoc}
     */
     __get(key) {
+        if (key == 'data') return this.__object.data;
+
         return this.data.has(key) ? this.data.get(key) : '';
     }
 

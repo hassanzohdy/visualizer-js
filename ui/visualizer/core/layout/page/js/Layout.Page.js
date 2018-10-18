@@ -8,7 +8,7 @@ class _Page {
         this.events = events;
         this.layout = layout;
         this.router = router;
-        this.middleware = middleware;
+        this.middlewareCollection = middleware;
 
         this._setDefaults();
 
@@ -51,7 +51,7 @@ class _Page {
     */
     run() {                    
         for (let middleware of this.middleware) {
-            let next = this.middleware.negotiateWith(middleware);
+            let next = this.middlewareCollection.negotiateWith(middleware);
 
             if (next !== Middleware.NEXT) return next;
         }
