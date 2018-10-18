@@ -433,7 +433,7 @@ class Validator {
 
         if (Is.empty(inputErrors)) return;
 
-        this.errors[inputName] = Array.remove(inputErrors, errorType);
+        this.errors[inputName] = inputErrors.remove(errorType);
 
         if (Is.empty(this.errors[inputName])) {
             delete this.errors[inputName];
