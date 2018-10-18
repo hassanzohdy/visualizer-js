@@ -40,7 +40,7 @@ class Modal {
 
                 if (Is.object(this.options.animation.show)) {
                     animation = this.options.animation.show.name;
-                    speedMode = this.options.animation.show.speed;
+                    speed = this.options.animation.show.speed;
                 }
 
                 this.modalFactory.animator.animate(this.modalDialog, animation, speed);
@@ -65,7 +65,7 @@ class Modal {
 
                 if (Is.object(this.options.animation.hide)) {
                     animation = this.options.animation.hide.name;
-                    speedMode = this.options.animation.hide.speed;
+                    speed = this.options.animation.hide.speed;
                 }
 
                 this.modalFactory.animator.animate(this.modalDialog, animation, speed).then(() => {
