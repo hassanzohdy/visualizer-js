@@ -103,13 +103,6 @@ class Http {
         // because PATCH and PUT requests don't accept form data
         // so it will be exclusively to POST request
         if (['POST', 'PUT', 'PATCH'].includes(options.method)) {
-            if (!Is.empty(options.data) && (Is.jquery(options.data) || Is.formHandler(options.data))) {
-                options.data = new FormData(options.data[0]);
-                options.cache = false;
-                options.processData = false;
-                options.contentType = false;
-            }
-
             // a fix for sending form-data to back-end if the request method is PUT
             // as uploading files is not supported in the PUT requests
             if (options.method == 'PUT') {
@@ -123,6 +116,14 @@ class Http {
                     }
                 }
             }
+
+            if (!Is.empty(options.data) && (Is.jquery(options.data) || Is.formHandler(options.data))) {
+                options.data = new FormData(options.data[0]);
+                options.cache = false;
+                options.processData = false;
+                options.contentType = false;
+            }
+
         }
 
         if (this.events.trigger('http.loading', options.url, options) === false) return;
