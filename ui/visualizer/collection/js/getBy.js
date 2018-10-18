@@ -8,7 +8,7 @@
 collect().macro('getBy', function (name, value) {
     let matchedItem;
     this.each(function (item) {
-        if (item.name == value) {
+        if (item[name] == value) {
             matchedItem = item;
         }
     });
