@@ -5,6 +5,12 @@ class ImageSelector extends Form.Plugin {
     constructor(dom) {
         super('imageSelector');
         this.dom = dom;
+
+        ImageSelector.imagePlaceholder = Config.get('form.imageSelector.imagePlaceholder');
+
+        if (! ImageSelector.imagePlaceholder) {
+            throw new Error('Please define the imagePlaceholder in config file, form.imageSelector.imagePlaceholder');
+        }
     }
 
     /**
@@ -52,7 +58,7 @@ class ImageSelector extends Form.Plugin {
      */
     macro(selector, options = {}) {
         return this.plugin('imageSelector').run(this.find(selector || '.image-file-input'), Object.merge({
-            imagePlaceholder: Config.get('form.imageSelector.imagePlaceholder'),
+            imagePlaceholder: ImageSelector.imagePlaceholder,
         }, options));
     }
 }

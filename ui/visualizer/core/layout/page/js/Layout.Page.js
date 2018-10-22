@@ -19,6 +19,10 @@ class _Page {
         });
 
         DI.resolve(this, 'bootstrap');
+
+        if (this.smartView) {
+            this.smartView = Config.get('app.name') + '/' + this.smartView;
+        }
     }
 
     /** 
@@ -34,6 +38,8 @@ class _Page {
 
         this.html = ''; // to put html without views
 
+        this.smartView = ''; // smart view path
+
         // middleware list
         this.middleware = [];
     }
@@ -43,13 +49,13 @@ class _Page {
     * This method is triggered only once in the whole request
     *
     */
-    bootstrap() {}
+    bootstrap() { }
 
     /**
     * Run the page
     *
     */
-    run() {                    
+    run() {
         for (let middleware of this.middleware) {
             let next = this.middlewareCollection.negotiateWith(middleware);
 
@@ -62,6 +68,10 @@ class _Page {
 
         this.init();
 
+        if (this.smartView) {
+            this.__updateDOM();
+        }
+
         if (this.viewName) {
             this.html = this.view(this.viewName);
         }
@@ -73,6 +83,15 @@ class _Page {
         if (this.title) {
             this.setTitle(this.title);
         }
+    }
+
+    /**
+     * Render smart view
+     */
+    __updateDOM() {
+        let view = SMART_VIEWS[this.smartView];
+
+        patch(document.getElementsByTagName('main')[0], view, this);
     }
 
     /**
@@ -89,7 +108,7 @@ class _Page {
     * This method is triggered each time the visitors opens the route of current page
     *
     */
-    init() {}
+    init() { }
 
     /**
      * Set page content
@@ -104,7 +123,7 @@ class _Page {
     /**
      * Triggered only when page content is set
      */
-    ready() {}
+    ready() { }
 
     /**
      * Set page title

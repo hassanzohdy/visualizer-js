@@ -16,7 +16,7 @@ class DatePicker extends Form.Plugin {
                 options = {
                     autoclose: true,
                     show: true,
-                    format: input.data('format') ? input.data('format') : 'dd-mm-yyyy',
+                    format: input.data('format') || 'dd-mm-yyyy',
                 };
 
             let startDate = input.data('start-date');

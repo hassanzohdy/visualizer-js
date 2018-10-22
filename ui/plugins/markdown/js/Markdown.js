@@ -2,7 +2,7 @@ class Markdown {
     /**
      * Constructor
      */
-    constructor(modals, codeHighlighter) {
+    constructor() {
         this.markdown = new showdown.Converter({
             simpleLineBreaks: true,
             tables: true,
@@ -10,13 +10,13 @@ class Markdown {
         });
 
         this.options = Config.get('markdown');
- 
+
         this.blacklistTags = Object.get(this.options, 'blacklistTags') || [
             'script',
         ];
-        this.whitelistTags = Object.get(this.options, 'whitelistTags') || [
-            'kbd',
-        ];
+        // this.whitelistTags = Object.get(this.options, 'whitelistTags') || [
+        //     'kbd',
+        // ];
     }
 
     /**
@@ -28,9 +28,9 @@ class Markdown {
      */
     render(html, withCodeStyling = Markdown.WITH_CODE_STYLING) {
         html = $('<div />').html(html);
-        
+
         // whitelist tags
-        html.find('*').not(this.whitelistTags.join(' ')).remove();
+        // html.find('*').not(this.whitelistTags.join(' ')).remove();
         html = this.markdown.makeHtml(html.html());
 
         showdown.extension('keyboardKey', {
@@ -46,9 +46,9 @@ class Markdown {
         html = $('<span />').html(html);
 
         // remove any script tags
-        // html.find(this.blacklistTags.join(',')).each(function () {
-        //     $(this).remove();
-        // });
+        html.find(this.blacklistTags.join(',')).each(function () {
+            $(this).remove();
+        });
 
         let children = html.find('*');
 

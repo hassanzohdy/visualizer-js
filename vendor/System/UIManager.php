@@ -101,7 +101,7 @@ class UIManager
     private $env;
 
     /**
-     * If set to true then the application will be rebuilt again 
+     * If set to true then the application will be rebuilt again
      *
      * @var bool
      */
@@ -147,14 +147,14 @@ class UIManager
 
         $this->config = json_decode($app->file->content('config.json'));
 
-        if (! $this->config) {
+        if (!$this->config) {
             throw new Exception('Invalid syntax for config.json file');
         }
     }
 
     /**
      * Set environment mode
-     * 
+     *
      * @param string $env
      * @return $this
      */
@@ -167,7 +167,7 @@ class UIManager
 
     /**
      * Force rebuild application
-     * 
+     *
      * @param bool $forceRebuild
      * @return $this
      */
@@ -176,9 +176,10 @@ class UIManager
         $this->forceRebuild = $forceRebuild;
 
         // remove the app directory first
-        
+
         if (is_dir('public/static/' . $this->currentApp->name)) {
-            (new FileSystem)->remove('public/static/' . $this->currentApp->name);
+            @(new FileSystem)->remove('public/static/' . $this->currentApp->name . '/css');
+            @(new FileSystem)->remove('public/static/' . $this->currentApp->name . '/js');
         }
 
         return $this;
@@ -191,24 +192,24 @@ class UIManager
      */
     private function init()
     {
-        if (! $this->currentApp) {
+        if (!$this->currentApp) {
             $route = $this->app->request->url();
 
             foreach ($this->config->apps as $appName => $app) {
                 if (strpos($route, $app->path) === 0) {
-                    
+
                     $locale = $app->locale;
                     $uri = $this->app->request->url();
 
                     if ($uri == $app->path) {
-                        $this->app->url->redirectTo($uri  . '/' . $locale);
+                        $this->app->url->redirectTo($uri . '/' . $locale);
                     } else {
-                        // check if the 
+                        // check if the
                         $uriWithoutAppPath = str_replace_first($app->path, '', $uri);
                         $uriWithoutAppPath = array_values(array_filter(explode('/', $uriWithoutAppPath)));
-                        
-                        if (! in_array($uriWithoutAppPath[0], $app->locales)) {
-                            $this->app->url->redirectTo($app->path  . '/' . $app->locale . '/' . implode('/', $uriWithoutAppPath));
+
+                        if (!in_array($uriWithoutAppPath[0], $app->locales)) {
+                            $this->app->url->redirectTo($app->path . '/' . $app->locale . '/' . implode('/', $uriWithoutAppPath));
                         } else {
                             $locale = $uriWithoutAppPath[0];
                         }
@@ -217,31 +218,31 @@ class UIManager
                     $app->locale = $locale;
 
                     $language = $this->config->locales->{$app->locale};
-   
+
                     $this->buildApp($appName);
 
                     break;
                 }
-            } 
+            }
         }
     }
 
     /**
      * Build the given application name
-     * 
+     *
      * @param string $appName
      * @return void
      */
     public function buildApp($appName)
     {
-        if (! isset($this->config->apps->$appName)) {
+        if (!isset($this->config->apps->$appName)) {
             throw new Exception(sprintf('Call to undefined application %s', $appName));
         }
-        
+
         $app = $this->config->apps->$appName;
 
         $language = $this->config->locales->{$app->locale};
-  
+
         $language->code = $app->locale;
 
         $this->app->share('language', $language);
@@ -249,7 +250,7 @@ class UIManager
         $app->name = $appName;
 
         $this->currentApp = $app;
-        
+
         $localeCode = $this->currentApp->locale;
 
         $this->currentApp->direction = $this->config->locales->{$localeCode}->direction;
@@ -257,7 +258,7 @@ class UIManager
         $this->currentApp->baseUrl = $this->currentApp->baseUrl ?? $this->config->baseUrl;
         $this->currentApp->locale = $this->currentApp->locale ?? $this->config->locale ?? 'en';
 
-        if (! in_array($localeCode, $this->currentApp->locales)) {
+        if (!in_array($localeCode, $this->currentApp->locales)) {
             $this->app->url->redirectTo("/{$this->currentApp->locale}");
         }
 
@@ -306,12 +307,12 @@ class UIManager
         $tags = '';
 
         foreach ($this->stylesheets as $stylesheet) {
-            $tags .= '<link rel="stylesheet" class="' . (strpos($stylesheet, 'app') !== false ? 'app-style' : '') . '" dir="' . $this->currentApp->direction . '" href="' . $stylesheet . '"/>';
+            $tags .= '<link rel="stylesheet" id="' . (strpos($stylesheet, 'app') !== false ? 'app-style' : '') . '" dir="' . $this->currentApp->direction . '" href="' . $stylesheet . '"/>';
         }
 
         // for full list of favicons tags please visit the following link
         // https://stackoverflow.com/a/43154399
-        if (! empty($this->resources['favicon'])) {
+        if (!empty($this->resources['favicon'])) {
             $favicon = assets("static/{$this->currentApp->name}/{$this->resources['favicon']}");
             $tags .= '<link rel="icon" href="' . $favicon . '"/>';
             $tags .= '<link rel="apple-touch-icon" href="' . $favicon . '"/>';
@@ -344,13 +345,13 @@ class UIManager
 
     /**
      * Produce application
-     * 
+     *
      * @return this
      */
-    public function produce() 
+    public function produce()
     {
         $this->forceRebuild(true);
-        
+
         $this->init();
 
         $this->uiDir = $this->app->file->to('ui') . '/';
@@ -377,14 +378,6 @@ class UIManager
     {
         $this->init();
 
-        $this->uiDir = $this->app->file->to('ui') . '/';
-
-        $this->staticDir = $this->app->file->toPublic('static') . '/' . $this->currentApp->name . '/';
-
-        if (!is_dir($this->staticDir)) {
-            mkdir($this->staticDir, 0777, true);
-        }
-
         if ($this->env == 'production') {
             return $this->runInProductionMode();
         } else {
@@ -399,17 +392,29 @@ class UIManager
      */
     private function runInProductionMode()
     {
+        $appName = $this->currentApp->name;
+        $localeCode = $this->currentApp->locale;
+        $direction = $this->config->locales->$localeCode->direction;
+        return file_get_contents("vendor/System/storage/visualizer/$appName-$localeCode-$direction.html");
         $loaderFile = json_decode(file_get_contents("vendor/System/storage/visualizer/{$this->currentApp->name}-{$this->currentApp->direction}.min.json"));
 
         $this->resources = (array) $loaderFile;
 
-        $this->stylesheets = array_map(function($file) {
+        $this->stylesheets = array_map(function ($file) {
             return assets($file);
         }, $loaderFile->stylesheets);
-        
-        $this->scripts = array_map(function($file) {
+
+        $this->scripts = array_map(function ($file) {
             return assets($file);
         }, $loaderFile->scripts);
+
+        return $this->app->view->render('vendor/System/ui-html/development', [
+            'title' => $this->currentApp->title->{clang()->code},
+            'stylesheets' => $this->stylesheets(),
+            'scripts' => $this->scripts(),
+            'appName' => $this->currentApp->name,
+            'appPath' => $this->currentApp->path,
+        ]);
     }
 
     /**
@@ -419,27 +424,37 @@ class UIManager
      */
     private function runInDevelopmentMode()
     {
-        $cachedLoaderFile = $this->app->file->to('vendor/System/storage/' . $this->framework . '/' . $this->currentApp->name .'.json');
+        $this->uiDir = $this->app->file->to('ui') . '/';
 
-        if (! file_exists($cachedLoaderFile) OR $this->forceRebuild) {
+        $this->staticDir = $this->app->file->toPublic('static') . '/' . $this->currentApp->name . '/';
+
+        if (!is_dir($this->staticDir)) {
+            mkdir($this->staticDir, 0777, true);
+        }
+
+        $cachedLoaderFile = $this->app->file->to('vendor/System/storage/' . $this->framework . '/' . $this->currentApp->name . '.json');
+
+        if (!file_exists($cachedLoaderFile) or $this->forceRebuild) {
             $this->build();
         } else {
             $this->resources = json_decode(file_get_contents($cachedLoaderFile), true);
         }
 
         $this->compileScss();
-        
+
         $this->renderHtmlViews();
-        
+
         $this->stylesheets = [
             assets("static/{$this->currentApp->name}/css/vendor.css?v=" . time()),
             assets("static/{$this->currentApp->name}/css/app-" . $this->currentApp->direction . ".css?v=" . time()),
         ];
 
         $this->scripts = array_unique(array_merge($this->resources['jsVendor'], $this->resources['jsFiles']));
-        
-        return $this->app->view->render('vendor/System/ui-html/ui', [
-            'title' => $this->currentApp->title->{clang()->code},   
+
+        $this->collectSmartViews();
+
+        return $this->app->view->render('vendor/System/ui-html/development', [
+            'title' => $this->currentApp->title->{clang()->code},
             'stylesheets' => $this->stylesheets(),
             'scripts' => $this->scripts(),
             'appName' => $this->currentApp->name,
@@ -476,22 +491,72 @@ class UIManager
 
     /**
      * Compile for production
-     * 
+     *
      * @return void
      */
     public function compileForProduction()
     {
         $this->hash = sha1(time() . mt_rand());
 
-        $this->compileJs();
-
         // now compile css
         $this->compileCss();
+
+        $this->compileJs();
+
+        // now we will generate cached views
+        // for each locale
+
+        $baseUrl = $this->config->baseUrl;
+
+        if (is_object($baseUrl)) {
+            $baseUrl = $this->config->baseUrl->production;
+        }
+
+        $baseUrl = trim($baseUrl, '/');
+
+        $basePath = trim($baseUrl . $this->currentApp->path, '/');
+
+        $staticPath = "{$baseUrl}/public/static/{$this->currentApp->name}";
+
+        $appName = $this->currentApp->name;
+
+        foreach ($this->currentApp->title as $localeCode => $title) {
+            $direction = $this->config->locales->$localeCode->direction;
+            $stylesheets = [
+                "$staticPath/css/vendor-{$this->hash}.min.css",
+                "$staticPath/css/app-{$direction}-{$this->hash}.min.css",
+            ];
+
+            $favicon = $this->resources['favicon'] ? $staticPath . '/' . $this->resources['favicon'] : '';
+
+            $scripts = [];
+
+            foreach ($this->scripts as $esVersion => $scriptsList) {
+                foreach ($scriptsList as $script) {
+                    $scripts[$esVersion][] = $baseUrl . '/public/' . $script;
+                }
+            }
+
+            // $scripts = json_encode($scripts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+            $outputView = $this->app->view->render('vendor/System/ui-html/production', [
+                'title' => $title,
+                'stylesheets' => $stylesheets,
+                'scripts' => $scripts,
+                'appName' => $appName,
+                'direction' => $direction,
+                'localeCode' => $localeCode,
+                'favicon' => $favicon,
+                'basePath' => $basePath,
+            ]);
+
+            file_put_contents("vendor/System/storage/visualizer/$appName-$localeCode-$direction.html", $outputView);
+        }
     }
 
     /**
      * Compile css for production
-     * 
+     *
      * @return void
      */
     private function compileCss()
@@ -506,9 +571,9 @@ class UIManager
                 'stylesheets' => $this->stylesheets,
                 'scripts' => $this->scripts,
                 'favicon' => $this->resources['favicon'] ?? '',
-            ]));    
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         }
-        
+
         $this->compileScss('ltr');
         $this->compileScss('rtl');
 
@@ -524,13 +589,13 @@ class UIManager
 
     /**
      * Compile javascript files
-     * 
+     *
      * @return void
      */
     private function compileJs()
     {
         set_time_limit(0);
-        
+
         return $this->babelCompiler();
 
         $js = '';
@@ -545,12 +610,14 @@ class UIManager
 
         $compiledVendorJs = $this->compileJsCode($js);
 
-        if (empty($compiledVendorJs->code)) pred($compiledVendorJs);
+        if (empty($compiledVendorJs->code)) {
+            pred($compiledVendorJs);
+        }
 
         $vendorPath = 'static/' . $this->currentApp->name . '/js/vendor-' . $this->hash . '.min.js';
 
         file_put_contents('public/' . $vendorPath, $compiledVendorJs->code);
-                
+
         $js = '';
 
         foreach ($this->resources['jsFiles'] as $jsPath) {
@@ -561,7 +628,9 @@ class UIManager
 
         $compiledAppJs = $this->compileJsCode($js);
 
-        if (empty($compiledAppJs->code)) pred($compiledAppJs);
+        if (empty($compiledAppJs->code)) {
+            pred($compiledAppJs);
+        }
 
         $appPath = 'static/' . $this->currentApp->name . '/js/app-' . $this->hash . '.min.js';
 
@@ -575,14 +644,22 @@ class UIManager
 
     /**
      * Compile code using babel
-     * 
+     *
      * @return void
      */
     private function babelCompiler()
     {
-        mkdir('public/static/' . $this->currentApp->name . '/js-builds');
-     
+        mkdir($jsBuildsDir = 'public/static/' . $this->currentApp->name . '/js-builds');
+
+        $this->scripts = [
+            'es5' => [],
+            'es6' => [],
+        ];
+
+        // vendor
         $js = '';
+
+        $es6Signature = substr(sha1(mt_rand()), 0, 6) . '-';
 
         foreach ($this->resources['jsVendor'] as $jsPath) {
             $js .= file_get_contents(ltrim($jsPath, '/')) . ';' . PHP_EOL;
@@ -591,13 +668,20 @@ class UIManager
         $inputFile = $this->app->file->toPublic('static/' . $this->currentApp->name . '/js-builds/vendor.js');
 
         file_put_contents($inputFile, $js);
-        
-        $vendorPath = 'static/' . $this->currentApp->name . '/js/vendor-' . $this->hash . '.min.js';
 
-        $outputFile = $this->app->file->toPublic($vendorPath);
+        $es5VendorPath = 'static/' . $this->currentApp->name . '/js/vendor-' . $this->hash . '.min.js';
+        $es6VendorPath = 'static/' . $this->currentApp->name . '/js/vendor-' . $es6Signature . $this->hash . '.min.js';
 
-        exec("{$this->app->file->to('node_modules/.bin')}/babel $inputFile --out-file $outputFile");
-       
+        $es5VendorOutputFile = $this->app->file->toPublic($es5VendorPath);
+        $es6VendorOutputFile = $this->app->file->toPublic($es6VendorPath);
+
+        // es6
+        exec("{$this->app->file->to('node_modules/.bin')}/minify $inputFile --mangle=false --removeConsole=true --out-file $es6VendorOutputFile");
+
+        // es5
+        exec("{$this->app->file->to('node_modules/.bin')}/babel $inputFile --out-file $es5VendorOutputFile");
+
+        // app + framework
         $js = '';
 
         foreach ($this->resources['jsFiles'] as $jsPath) {
@@ -608,32 +692,48 @@ class UIManager
 
         file_put_contents($inputFile, $js);
 
-        $appPath = 'static/' . $this->currentApp->name . '/js/app-' . $this->hash . '.min.js';
+        $es5AppPath = 'static/' . $this->currentApp->name . '/js/app-' . $this->hash . '.min.js';
+        $es6AppPath = 'static/' . $this->currentApp->name . '/js/app-' . $es6Signature . $this->hash . '.min.js';
 
-        $outputFile = $this->app->file->toPublic($appPath);
+        $es5OutputFile = $this->app->file->toPublic($es5AppPath);
+        $es6OutputFile = $this->app->file->toPublic($es6AppPath);
 
-        exec($this->app->file->to('node_modules/.bin/babel') . " $inputFile --out-file $outputFile --presets env");
         // es6
-        $esShim = file_get_contents($this->app->file->to('node_modules/es6-shim/es6-shim.min.js'));
+        exec("{$this->app->file->to('node_modules/.bin')}/minify $inputFile --mangle=false --removeConsole=true --out-file $es6OutputFile");
+
+        // es5
+        exec($this->app->file->to('node_modules/.bin/babel') . " $inputFile --out-file $es5OutputFile --presets env --mangle=false --removeConsole=true");
+        // es6
+        // $esShim = file_get_contents($this->app->file->to('node_modules/es6-shim/es6-shim.min.js'));
         // es7
-        $esShim .= file_get_contents($this->app->file->to('node_modules/es7-shim/dist/es7-shim.min.js'));
+        // $esShim .= file_get_contents($this->app->file->to('node_modules/es7-shim/dist/es7-shim.min.js'));
+
+        // babel polyfill
+        $esShim = file_get_contents('https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.0.0-rc.4/polyfill.min.js');
 
         // proxy
         $esShim .= file_get_contents($this->app->file->to('node_modules/proxy-polyfill/proxy.min.js'));
-        
-        $jsCode = $esShim . file_get_contents($outputFile);
 
-        file_put_contents($outputFile, $jsCode);
+        $jsCode = $esShim . file_get_contents($es5OutputFile);
 
-        $this->scripts = [
-            $vendorPath,
-            $appPath,
+        file_put_contents($es5OutputFile, $jsCode);
+
+        $this->scripts['es5'] = [
+            $es5VendorPath,
+            $es5AppPath,
         ];
+
+        $this->scripts['es6'] = [
+            $es6VendorPath,
+            $es6AppPath,
+        ];
+
+        // (new FileSystem)->remove($jsBuildsDir);
     }
 
     /**
      * Compile js code
-     * 
+     *
      * @param string $js
      * @return string
      */
@@ -684,7 +784,7 @@ class UIManager
 
         $this->saveComponents();
 
-        file_put_contents($this->app->file->to('vendor/System/storage/' . $this->framework . '/' . $this->currentApp->name .'.json'), json_encode($this->resources));
+        file_put_contents($this->app->file->to('vendor/System/storage/' . $this->framework . '/' . $this->currentApp->name . '.json'), json_encode($this->resources, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 
     /**
@@ -724,11 +824,11 @@ class UIManager
         foreach ($packages as $package) {
             $this->loadPackage($package);
         }
-        
+
         foreach ($plugins as $plugin) {
             $this->loadPackage($plugin, 'plugin');
         }
-        
+
         $this->loadPackage($this->currentApp->name, 'app');
     }
 
@@ -741,8 +841,10 @@ class UIManager
      */
     private function loadPackage(string $packageName, string $packageType = 'framework')
     {
-        if (! empty($this->resources['packages'][$packageType . '@' . $packageName])) return;
-        
+        if (!empty($this->resources['packages'][$packageType . '@' . $packageName])) {
+            return;
+        }
+
         if ($packageType == 'framework') {
             $packagePath = $this->framework . '/' . $packageName;
         } elseif ($packageType == 'plugin') {
@@ -751,7 +853,7 @@ class UIManager
             $packagePath = 'apps/' . $this->currentApp->name;
         }
 
-        if (! $this->exists($packagePath . '/package.json')) {
+        if (!$this->exists($packagePath . '/package.json')) {
             throw new Exception(sprintf('Missing package.json file for "%s" package "%s"', $packageType, $packageName));
         }
 
@@ -795,27 +897,27 @@ class UIManager
             $package->components = array_merge($package->components, [
                 'layout/common',
                 'layout/layout',
-                'pages', 
+                'pages',
             ]);
             foreach ($package->components as $appComponent) {
                 $this->resources['packages']["app@$appComponent"] = "apps/{$this->currentApp->name}/components/$appComponent";
             }
         }
-        
+
         $this->collectVendors($package);
         $this->collectExternals($package);
 
-        if (! empty($package->assets)) {
-            $this->collectAssets($package->assets, $package->path . '/assets');        
+        if (!empty($package->assets)) {
+            $this->collectAssets($package->assets, $package->path . '/assets');
         }
     }
 
     /**
      * Collect all assets
-     * 
+     *
      * @param array $assets
      * @param string $assetPath
-     * @return void 
+     * @return void
      */
     private function collectAssets($assets, $assetPath)
     {
@@ -827,9 +929,9 @@ class UIManager
                     'dist' => $asset,
                     'src' => $asset,
                 ];
-            } 
-            
-            if (empty($asset->src) OR empty($asset->dist)) {
+            }
+
+            if (empty($asset->src) or empty($asset->dist)) {
                 throw new Exception(sprintf('Assets object must have "src" and "dist" keys'));
             }
 
@@ -845,14 +947,16 @@ class UIManager
     /**
      * Collect all vendors files for both js and css
      *
-     * @param object $package 
+     * @param object $package
      * @return void
      */
     private function collectVendors($package)
     {
-        if (empty($package->vendor)) return;
+        if (empty($package->vendor)) {
+            return;
+        }
 
-        if (! empty($package->vendor->assets)) {
+        if (!empty($package->vendor->assets)) {
             $assets = $package->vendor->assets;
             $this->collectAssets($assets, 'vendor');
             unset($package->vendor->assets);
@@ -869,11 +973,13 @@ class UIManager
      */
     private function collectExternals($package)
     {
-        if (empty($package->externals)) return;
+        if (empty($package->externals)) {
+            return;
+        }
 
         $this->resources['externals'] = array_merge_recursive($this->resources['externals'], (array) $package->externals);
     }
-    
+
     /**
      * Save vendors files
      *
@@ -945,7 +1051,7 @@ class UIManager
 
             foreach ($assets->src as $asset) {
                 $assetPath = $this->path($asset);
-                
+
                 if (!is_dir($assetPath)) {
                     throw new Exception(sprintf('%s asset doesn\'t exists', $asset));
                 }
@@ -955,13 +1061,13 @@ class UIManager
         }
 
         // move favicons if found
-        if (! empty($this->loader->app->favicon)) {
+        if (!empty($this->loader->app->favicon)) {
             $this->resources['favicon'] = $this->loader->app->favicon;
-           
+
             if (is_string($this->resources['favicon'])) {
-               $favicon = $this->resources['favicon'];
+                $favicon = $this->resources['favicon'];
                 $from = $this->uiDir . "apps/{$this->currentApp->name}/assets/$favicon";
-                
+
                 if (!is_file($from)) {
                     $to = $this->staticDir . 'assets/' . $favicon;
                     $fileSystem->mirror($from, $to);
@@ -991,20 +1097,20 @@ class UIManager
 
         $jsComponentsContent .= "
             window.onerror = function(msg, url, lineNo, columnNo, error)  {
-           
+
                 var message = [
                     'Message: ' + msg,
                     'URL: ' + url,
                     'Line: ' + lineNo,
                     'Error object: ' + JSON.stringify(error)
                 ].join(' - ');
-                
+
                 // $('body').append(navigator.userAgent);
 
                 $('body').append(message);
             };
         ";
-        
+
         $jsComponentsContent .= "var _C = '$config';";
 
         // now we need to check if there is any externals files to be loaded
@@ -1020,7 +1126,7 @@ class UIManager
         }
 
         // add a global variable __EXTERNALS__ to the beginning of the vendor file
-        $jsComponentsContent .= "var __EXTERNALS__ = JSON.parse('" . json_encode($externals) . "');";
+        $jsComponentsContent .= "var SMART_VIEWS = {}; var __EXTERNALS__ = JSON.parse('" . json_encode($externals, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . "');";
         $jsComponentsContent .= "var LANGUAGES = JSON.parse('" . json_encode($this->config->locales) . "');";
 
         file_put_contents($initPath = $this->staticDir . 'js/__init__.js', $jsComponentsContent);
@@ -1031,11 +1137,13 @@ class UIManager
         foreach ($jsFinder->in($this->resources['packages'])->path('js')->files()->name('*.js') as $file) {
             $jsPath = str_replace('\\', '/', substr($file->getRealPath(), strpos($file->getRealPath(), 'ui')));
 
-            if (in_array($jsPath, $this->resources['jsFiles'])) continue;
+            if (in_array($jsPath, $this->resources['jsFiles'])) {
+                continue;
+            }
 
             $this->resources['jsFiles'][] = $jsPath;
         }
-        
+
         $this->resources['jsFiles'][] = 'ui/apps/' . $this->currentApp->name . '/components/config.js';
         $this->resources['jsFiles'][] = 'ui/apps/' . $this->currentApp->name . '/components/routing.js';
         $this->resources['jsFiles'][] = 'ui/apps/' . $this->currentApp->name . '/components/app.js';
@@ -1047,15 +1155,15 @@ class UIManager
                 alias: "app"
             });
 
-            $.app = DI.resolve("app");
+            let app = DI.resolve("app");
 
-            $.app.__bootstrap();
+            app.__bootstrap();
 
-            $.app.ready(() => {
-                $.app.init();
+            app.ready(() => {
+                app.init();
 
-                if ($.app.autoRun === true) {
-                    $.app.run();
+                if (app.autoRun === true) {
+                    app.run();
                 }
             });
         ';
@@ -1079,7 +1187,7 @@ class UIManager
         // as it will next to components folder
         $scssPath = [
             $this->app->file->to('ui/scss'),
-            $this->app->file->to('ui/apps/' . $this->currentApp->name . '/scss/')
+            $this->app->file->to('ui/apps/' . $this->currentApp->name . '/scss/'),
         ];
 
         if (file_exists($this->app->file->to('ui/apps/' . $this->currentApp->name . '/scss/app.scss'))) {
@@ -1098,6 +1206,24 @@ class UIManager
         // die;
 
         file_put_contents($this->staticDir . 'css/app-' . $direction . '.css', $cssComponentsContent);
+    }
+
+    /**
+     * Collect smart views
+     * 
+     * @return voids
+     */
+    protected function collectSmartViews()
+    {
+        if (! is_dir($this->staticDir . '/smart-views')) {
+            mkdir($this->staticDir . '/smart-views', 0777, true);
+        }
+        
+        $smartViewsFinder = new Finder;
+
+        foreach ($smartViewsFinder->in($this->staticDir . '/smart-views')->files()->name('*.js') as $file) {
+            $this->scripts[] = str_replace($this->app->file->to(''), '', $file->getRealPath());
+        }
     }
 
     /**
@@ -1120,7 +1246,9 @@ class UIManager
             // C:\xampp\htdocs\app\public\ui/components/alert\html\alert.html
             $fullPath = $file->getRealPath();
 
-            if (in_array($fullPath, $loadedViews)) continue;
+            if (in_array($fullPath, $loadedViews)) {
+                continue;
+            }
 
             $loadedViews[] = $fullPath;
 
@@ -1128,7 +1256,7 @@ class UIManager
             // this will be something like
             // components\alert\html\alert.html
             $relativeUiPath = str_remove_start($fullPath, $this->uiDir);
-            
+
             // replace the directory separator with /
             // this will be something like
             // components/alert/html/alert.html
@@ -1266,7 +1394,7 @@ class UIManager
 
     /**
      * Compile the given view to match es5 syntax
-     * 
+     *
      * @param  string $view
      * @return string
      */
@@ -1281,7 +1409,10 @@ class UIManager
         $pattern .= '/m';
 
         $view = preg_replace_callback($pattern, function ($matches) {
-            if (empty($matches[1])) return '';
+            if (empty($matches[1])) {
+                return '';
+            }
+
             $forContent = $matches[1];
 
             // it means the developer is using for let...of
@@ -1289,11 +1420,11 @@ class UIManager
                 list($var, $array) = explode(' of ', $forContent);
 
                 $returned = "for (var i = 0; i < $array.length; i++)" . PHP_EOL;
-    
-                $returned .= "\t\t\t " . 'var '. $var . ' = '. $array . '[i];' . PHP_EOL;
+
+                $returned .= "\t\t\t " . 'var ' . $var . ' = ' . $array . '[i];' . PHP_EOL;
             } else {
                 // it means the let statement is used with the normal for loop
-                $returned = "var $forContent"; 
+                $returned = "var $forContent";
             }
 
             return $returned;
@@ -1320,7 +1451,6 @@ class UIManager
         return str_replace("\n", '\n', str_replace('"', '\"', addcslashes(str_replace("\r", '', (string) $string), "\0..\37'\\")));
     }
 
-    
     /**
      * Determine whether if the given file exists in the ui directory
      *
@@ -1334,7 +1464,7 @@ class UIManager
 
     /**
      * Get full path in ui directory
-     * 
+     *
      * @param string $path
      * @return string
      */

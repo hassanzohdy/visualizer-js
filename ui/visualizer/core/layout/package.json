@@ -3,6 +3,7 @@
     "components": [
         "core/layout/layout",
         "core/layout/page",
-        "core/layout/partial"
+        "core/layout/partial",
+        "core/layout/smart-views"
     ]
 }

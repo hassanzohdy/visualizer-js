@@ -1,9 +1,10 @@
 <?php
 namespace System\CLI\Commands;
 
-use System\CLI\Config;
-use System\CLI\Command;
 use Symfony\Component\Filesystem\Filesystem;
+use System\CLI\Command;
+use System\CLI\Config;
+
 class NewPage extends Command
 {
     /**
@@ -49,16 +50,7 @@ class NewPage extends Command
 
         $fs = new FileSystem;
 
-        $defaultApp = '';
-
-        foreach ($config->apps as $appName => $app) {
-            if ($app->path == '/') {
-                $defaultApp = $appName;
-                break;
-            }
-        }
-
-        $defaultApp = Config::get('default-app');
+        $defaultApp = Config::get('baseApp');
 
         $appName = static::flag('app', $defaultApp);
 
@@ -71,6 +63,7 @@ class NewPage extends Command
         $this->appName = $appName;
 
         foreach ($pages as $pageName) {
+            $pageName = str_replace('//', '/', $pageName);
             $this->pageComponentPath = "ui/apps/{$appName}/components/pages/{$pageName}";
 
             if (is_dir($this->pageComponentPath)) {
@@ -80,7 +73,7 @@ class NewPage extends Command
 
             static::normal(sprintf('Creating %s page', static::inlinePurple($pageName)));
 
-            $this->className = implode('', array_map('ucFirst', explode('-', $pageName)));
+            $this->className = implode('', array_map('ucFirst', explode('-', str_replace('/', '-', $pageName))));
 
             $this->pageNameAlias = lcfirst($this->className);
 
@@ -121,7 +114,7 @@ class NewPage extends Command
         $jsFile = str_replace('class placeholder', "class {$this->className}Page", $jsFile);
 
         $jsFile = str_replace("this.name = 'placeholder';", "this.name = '{$this->pageNameAlias}';", $jsFile);
-        $jsFile = str_replace("placeholder", $pageName, $jsFile);
+        $jsFile = str_replace("placeholder", str_replace('/', '-', $pageName), $jsFile);
 
         unlink($this->pageComponentPath . '/js/Page.js');
 
@@ -164,7 +157,7 @@ class NewPage extends Command
 
     /**
      * Add page route to routes list
-     * 
+     *
      * @param  string $pageName
      * @return void
      */
@@ -178,11 +171,14 @@ class NewPage extends Command
 
         foreach ($routingJs as $line) {
             $lines .= $line;
-            
+
             if (strpos($line, "// add your routes") !== false) {
                 $lines .= PHP_EOL;
-                $lines .= "    // $pageName page" . PHP_EOL;    
-                $lines .= "    router.add('$route', {$this->className}Page);" . PHP_EOL;    
+                $lines .= "        // $pageName page";
+                $lines .= "
+        router.add('$route', {$this->className}Page, {
+            baseView: '$pageName',
+        });" . PHP_EOL;
             }
         }
 

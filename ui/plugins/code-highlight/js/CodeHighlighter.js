@@ -106,9 +106,8 @@ class CodeHighlighter {
      * 
      * @param string selector
      */
-    render(selector, blocksOnly = false) {
+    render(selector) {
         $(selector).find('code').each(function (i, code) {
-            if (blocksOnly && ! $(code).html().includes('\n')) return;
             hljs.highlightBlock(code);
         });
     }

@@ -14,7 +14,7 @@
         font-weight: bold;
     }
     .modal-dialog {
-        // @include responsive(( 576: ( max-width: none !important, ), ));
+        @include responsive(( 576: ( max-width: none !important, ), ));
     }
     .buttons-container {
         text-align: right;

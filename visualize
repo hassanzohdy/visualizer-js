@@ -13,12 +13,15 @@ $app = null;
 
 $optionsList = $argv;
 
+define('ROOT', __DIR__);
+
 // remove first one as its the file name
 array_shift($optionsList);
 
 $command = array_shift($optionsList);
 
 $commandsList = [
+    'serve' => System\CLI\Commands\Serve::class,
     'install' => System\CLI\Commands\Install::class,
     'new:page' => System\CLI\Commands\NewPage::class,
     'new:app' => System\CLI\Commands\NewApplication::class,

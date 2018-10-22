@@ -7,10 +7,11 @@ class User {
      * @param Router router
      * @param Events events
      */
-    constructor(cache, events, router) {
+    constructor(cache, events, router, layout) {
         this.cache = cache;
         this.events = events;
         this.router = router;
+        this.layout = layout;
         this.cacheEngineKey = 'userStorage';
         let cacheStorage = this.cache.get(this.cacheEngineKey, 'cache');
 
@@ -115,7 +116,7 @@ class User {
 
         this.cacheEngine.set(this.accessTokenCacheKey, user.accessToken);
         // change the layout to the logged-in one
-        use('layout').rebuild(Config.get('layout.loggedInBasePath'));
+        this.layout.rebuild(Config.get('layout.basePath'));
 
         // call init method as it will automatically mark the user as logged-in
         this.init();
@@ -127,7 +128,7 @@ class User {
     logout() {
         this.cacheEngine.remove(this.accessTokenCacheKey);
         // change the layout to the not-logged-in one
-        use('layout').rebuild(Config.get('layout.basePath'));
+        this.layout.rebuild(Config.get('layout.basePath'));
     }
 }
 

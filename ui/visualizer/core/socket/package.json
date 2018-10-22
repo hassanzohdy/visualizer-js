@@ -1,0 +1,8 @@
+{
+    "name": "core/socket",
+    "vendor": {
+        "js": [
+            "javascript/socket/js/socket.min.js"
+        ]
+    } 
+}

@@ -37,14 +37,22 @@ class DependencyInjection {
         // if the current class has no constructor method
         // then we will check if that class has a parent class
         // if so we will check if the parent has a constructor method
-        if (methodName == 'constructor' && methodPrototype.name === classInfo.name) {
-            let parent = Object.getPrototypeOf(classInfo.prototype),
-                parentText = parent.constructor.toString();
-        
-            // the first part of the condition is for es6
-            // the second part `after the ||` is for es5
-            if ((! methodText.includes('constructor') && parentText.includes('constructor')) || (parent.constructor.name != 'Object' && ! methodText.includes('function ' + classInfo.constructor.name) && parentText.includes('function ' + parent.constructor.name))) {
+        if (methodName == 'constructor' && methodPrototype.name === classInfo.name && !methodText.includes('constructor')) {
+            let parentText = DI.getParentText(classInfo);
+
+            if (parentText) {
                 methodText = parentText;
+            }
+        } else {
+            //  es5
+            let parent = DI.getParentClass(classInfo);
+
+            if (parent && parent.constructor.name != 'Object') {
+                let parentText = DI.getParentText(classInfo);
+
+                if (!methodText.includes('function ' + classInfo.constructor.name) && parentText.includes('function ' + parent.constructor.name)) {
+                    methodText = parentText;
+                }
             }
         }
 
@@ -60,11 +68,47 @@ class DependencyInjection {
 
         let regex = new RegExp(regexExp),
             matches = methodText.match(regex);
-    
+
         if (!matches || !matches[1]) return [];
 
         // now we will remove any spaces, tabs or new lines
         return matches[1].replace(/\t|\n|\s/g, '').replace(/,$/, '').split(',');
+    }
+
+    /**
+     * Get Parent text
+     * 
+     * @param  class classInfo
+     * @param  string method
+     * @returns string  
+     */
+    static getParentText(classInfo, method = 'constructor') {
+        classInfo = eval(classInfo);
+        let parent = DI.getParentClass(classInfo),
+            parentText = '';
+
+        if (parent && parent.prototype) {
+            parentText = parent.prototype[method].toString();
+            if (parentText.includes(method)) {
+                return parentText;
+            } else {
+                return DI.getParentText(parent, method);
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Get parent class of the given class
+     * 
+     * @param  class targetClass
+     * @returns parentClass|null
+     */
+    static getParentClass(targetClass) {
+        let parent = Object.getPrototypeOf(eval(targetClass));
+
+        return parent.name ? parent : null;
     }
 
     /**

@@ -26,8 +26,8 @@
     AddType application/x-httpd-php .asp .py .pl
 
     # Prevent clickjacking
-    Header append X-FRAME-OPTIONS "SAMEORIGIN"
-    Header set  X-XSS-Protection  "1; mode=block"
+    #Header append X-FRAME-OPTIONS "SAMEORIGIN"
+    #Header set  X-XSS-Protection  "1; mode=block"
 </IfModule>
 
 # Enable GZIP
@@ -83,10 +83,9 @@ BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
   Header set Cache-Control "max-age=2678400, public"
   </filesmatch>
   # Cache Javascripts for 31 days
-
+</IfModule>
 # php -- BEGIN cPanel-generated handler, do not edit
 # NOTE this account's php is controlled via FPM and the vhost, this is a place holder.
 # Do not edit. This next line is to support the cPanel php wrapper (php_cli).
 # AddType application/x-httpd-ea-php70 .php .phtml
 # php -- END cPanel-generated handler, do not edit
-</ifmodule>

@@ -40,3 +40,8 @@ class Random {
         return 'el-' + text;
     }
 }
+
+
+if (typeof window == 'undefined') {
+    global.Random = Random;
+}
