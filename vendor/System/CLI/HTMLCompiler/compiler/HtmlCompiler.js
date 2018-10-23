@@ -1,4 +1,4 @@
-class HtmlCompiler {
+exports.HtmlCompiler = class HtmlCompiler {
     /**
      * Constructor
      * 
@@ -48,33 +48,42 @@ class HtmlCompiler {
             booleanAttributes = {};
 
         if (element.hasAttribute('*for')) {
+            // combination between if and for in same element
+            if (element.hasAttribute('*if')) {
+                return this.controlStructure(element, 'if', '*if');
+            }
+
             this.parsed += `for (${element.getAttribute('*for')}) {\n`;
             element.removeAttribute('*for');
             this.extract(element, "Random.id(5)", null);
             this.parsed += '}\n';
             return;
         } else if (element.hasAttribute('*if')) {
-            this.parsed += `if (${element.getAttribute('*if')}) {\n`;
-            element.removeAttribute('*if');
-            this.extract(element);
-            this.parsed += '}\n';
-            return;
+            return this.controlStructure(element, 'if', '*if');
         } else if (element.hasAttribute('*elseif')) {
-            this.parsed += `else if (${element.getAttribute('*elseif')}) {\n`;
-            element.removeAttribute('*elseif');
-            this.extract(element);
-            this.parsed += '}\n';
-            return;
-        }  else if (element.hasAttribute('*else')) {
-            this.parsed += `else (${element.getAttribute('*else')}) {\n`;
-            element.removeAttribute('*else');
-            this.extract(element);
-            this.parsed += '}\n';
-            return;
+            return this.controlStructure(element, 'else if', '*elseif');
+        } else if (element.hasAttribute('*else')) {
+            return this.controlStructure(element, 'else', null);
         } else if (element.hasAttribute('[style]')) {
             let styling = element.getAttribute('[style]');
             element.removeAttribute('[style]');
             attributes += `, 'style', ${styling}`;
+        }
+
+        if (tag == 'if') {
+            if (!element.hasAttribute('condition')) {
+                throw new Error('<if tag must have a condition attribute');
+            }
+
+            return this.controlStructure(element, 'if', 'condition', 'extractChildren');
+        } else if (tag == 'elseif') {
+            if (!element.hasAttribute('condition')) {
+                throw new Error('<elseif tag must have a condition attribute');
+            }
+
+            return this.controlStructure(element, 'else if', 'condition', 'extractChildren');
+        } else if (tag == 'else') {
+            return this.controlStructure(element, 'else', null, 'extractChildren');
         }
 
         for (let attribute of element.attributes) {
@@ -92,7 +101,6 @@ class HtmlCompiler {
             } else if (attribute.name.includes('[') && attribute.name.includes(']')) {
                 attributeName = attribute.name.replace(/\[|\]/g, '');
                 element.removeAttribute(attribute.name);
-                // attributes += `, '${attributeName}', ${value}`;
                 booleanAttributes[attributeName] = `${value}`;
                 continue;
             } else {
@@ -107,30 +115,57 @@ class HtmlCompiler {
 
         let functionName = ['input', 'img', 'br', 'hr', 'link', 'meta'].includes(tag) ? 'elementVoid' : 'elementOpen',
             thereIsBooleanAttributes = Object.keys(booleanAttributes).length > 0,
-            elemtnVariable = `el${Random.string(3)}`;
+            elementVariable = `el${Random.string(3)}`;
 
         if (attributes) {
-            this.parsed += this.line(`var ${elemtnVariable} = ${functionName}('${tag}', ${id}, ${staticAttributes}${attributes})`);
+            this.parsed += this.line(`var ${elementVariable} = ${functionName}('${tag}', ${id}, ${staticAttributes}${attributes})`);
         } else {
-            this.parsed += this.line(`var ${elemtnVariable} = ${functionName}('${tag}', ${id}, ${staticAttributes})`);
+            this.parsed += this.line(`var ${elementVariable} = ${functionName}('${tag}', ${id}, ${staticAttributes})`);
         }
 
         if (thereIsBooleanAttributes) {
             for (let attribute in booleanAttributes) {
-                this.parsed += this.line(`${elemtnVariable}.${attribute} = ${booleanAttributes[attribute]}`);
+                this.parsed += this.line(`${elementVariable}.${attribute} = ${booleanAttributes[attribute]}`);
             }
         }
 
+        this.extractChildren(element);
+
+        if (functionName == 'elementOpen') {
+            this.parsed += this.line(`elementClose('${tag}')`);
+        }
+    }
+
+    /**
+     * Create new control structure
+     * 
+     * @param   Element element
+     * @param   string controlStructure
+     * @param   string extractMOde => extract | extractChildren
+     * @returns void
+     */
+    controlStructure(element, controlStructure, attributeName, extractMode = 'extract') {
+        let condition = controlStructure != 'else' ? `(${element.getAttribute(attributeName)})` : '';
+        this.parsed += `${controlStructure} ${condition} {\n`;
+        element.removeAttribute(attributeName);
+        this[extractMode](element);
+        this.parsed += '}\n';
+        return;
+    }
+
+    /**
+     * Extract element children
+     * 
+     * @param   Element element
+     * @returns void
+     */
+    extractChildren(element) {
         for (let child of element.childNodes) {
             if (child.constructor.name == 'Text') {
                 this.textNode(child);
             } else {
                 this.extract(child);
             }
-        }
-
-        if (functionName == 'elementOpen') {
-            this.parsed += this.line(`elementClose('${tag}')`);
         }
     }
 
@@ -146,11 +181,18 @@ class HtmlCompiler {
 
         if (!nodeValue) return '';
 
-        if (nodeValue.includes('${') && nodeValue.includes('(') && typeof window == 'undefined') {
-            nodeValue.split("\n").map(text => {
-                this.parsed += this.line(`eval(buildHtml(\`${text}\`))`);
+        if (nodeValue.includes('@html')) {
+            nodeValue.replace(/@html\((.*)\)/, (original, value) => {
+                this.staticHtml('${' + value + '}');
             });
-
+            return '';
+        } else if (nodeValue.includes('@echo')) {
+            nodeValue.replace(/@echo\((.*)\)/, (original, value) => {
+                this.parsed += this.line(`console.log(${value})`);
+            });
+            return '';
+        } else if (nodeValue.includes('${') && nodeValue.includes('(')) {
+            this.staticHtml(nodeValue);
             return '';
         }
 
@@ -159,6 +201,21 @@ class HtmlCompiler {
         });
 
         return '';
+    }
+
+    /**
+     * Add static html 
+     * 
+     * @param   string html
+     * @returns void
+     */
+    staticHtml(html) {
+        let elementVariable = `el${Random.string(4)}`;
+
+        this.parsed += this.line(`var ${elementVariable} = elementOpen('html-blob')`);
+        this.parsed += this.line(elementVariable + '.innerHTML = `' + html + '`');
+        this.parsed += this.line('skip()');
+        this.parsed += this.line(`elementClose('html-blob')`);
     }
 
     /**
@@ -180,8 +237,4 @@ class HtmlCompiler {
     line(code) {
         return code + ';' + "\n";
     }
-}
-
-if (typeof window == 'undefined') {
-    global.HtmlCompiler = HtmlCompiler;
 }

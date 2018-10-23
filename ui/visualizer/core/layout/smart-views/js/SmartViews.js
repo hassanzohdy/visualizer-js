@@ -8,7 +8,6 @@ class SmartViews {
         }
 
         _const('buildHtml', html => {
-            return (new HtmlCompiler(html)).parsed;
         });
     }
 }

@@ -1,7 +1,8 @@
-const {echo, fs, path, ROOT, APP_NAME, JSDOM, APP_DIR, UI_DIR, random, FRAMEWORK_NAME} = require('./../bootstrap');
+const { echo, fs, path, ROOT, APP_NAME, JSDOM, APP_DIR, UI_DIR, random, FRAMEWORK_NAME } = require('./../bootstrap');
 
-require(UI_DIR + '/visualizer/core/layout/smart-views/js/HtmlCompiler.js');
-let a = require(UI_DIR + '/visualizer/random/js/Random.js');
+require(UI_DIR + '/visualizer/random/js/Random.js');
+const HtmlCompiler = require('./HtmlCompiler').HtmlCompiler;
+const minify = require("babel-minify");
 
 exports.Parser = class Parser {
     constructor(html, filePath) {
@@ -18,16 +19,27 @@ exports.Parser = class Parser {
         this.html = html;
     }
 
-    parse() {        
+    parse() {
         let htmlCompiler = new HtmlCompiler(this.html);
-       
+
         this.parsed = htmlCompiler.parsed;
-      
+
         console.clear();
 
-        echo(this.parsed);
-        
-        let fileContent = `SMART_VIEWS['${this.viewName}'] = function (data) {${this.parsed}};`;
+        // the try-catch block MUST BE removed in production to reduce size
+        let fileContent = `
+            SMART_VIEWS['${this.viewName}'] = function (data) {
+                try {
+                ${this.parsed}
+            } catch(e) {
+                console.error(\`View Error in ${this.viewName}\`)
+                console.error(e.message.replace(/data\./g, 'this.')); 
+                throw new SyntaxError(\`${this.html}\`);
+            }
+        };
+        `.trim();
+
+        // fileContent = minify(fileContent).code;
 
         fs.writeFile(`${ROOT}/public/static/${APP_NAME}/smart-views/${this.viewName.replace(/\//g, '-')}.js`, fileContent, 'utf8', () => {
             echo(`${this.viewName} has been compiled successfully`);

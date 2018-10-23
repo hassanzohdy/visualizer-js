@@ -11,7 +11,7 @@ class BuildApplication extends Command
      */
     public function execute()
     {
-        $appName = array_shift($this->optionsList);
+        $appName = array_shift($this->optionsList) ?: Config::get('baseApp');
 
         if (!$appName) {
             return static::error('Please write down the application name!');
