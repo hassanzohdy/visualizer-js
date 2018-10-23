@@ -1,0 +1,10 @@
+Hello 
+{{ this.name }} 
+<ul>
+    <li *for="let item of this.items">
+        <span (click)="this.welcome($el)" [style]="this.style" class="{{ item.name }}">
+            {{ item.name }}
+        </span>
+    </li>
+</ul>
+{{ this.name }}

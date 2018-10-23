@@ -6,6 +6,7 @@ class CacheEngine {
     constructor(crypto) {
         this.crypto = crypto;
         this.init();
+        this.encryptValues = Config.get('cache.encryptValues', true);
     }
 
     /**
@@ -28,15 +29,15 @@ class CacheEngine {
     * @param int expiresAt Timestamp in milliseconds
     * @return this
     */
-    set(key, value, expiresAt = 0) {
+    set(key, value, expiresAt = Cache.FOREVER) {
         let settings = {
             data: value,
             expiresAt: expiresAt,
         };
 
-        let cipher = this.crypto.encrypt(settings);
+        value = this.encryptValues ? this.crypto.encrypt(settings) : JSON.stringify(settings);
 
-        this.storage.setItem(this.key(key), cipher);
+        this.storage.setItem(this.key(key), value);
 
         return this;
     }
@@ -53,7 +54,7 @@ class CacheEngine {
 
         if (! settings) return defaultValue;
 
-        let decryptedSettings = this.crypto.decrypt(settings);
+        let decryptedSettings = this.encryptValues ? this.crypto.decrypt(settings) : JSON.parse(settings);
 
         if (! decryptedSettings) {
             this.remove(key);
@@ -111,6 +112,7 @@ class CacheEngine {
 
 var Cache = CacheEngine;
 
+Cache.FOREVER = 0;
 Cache.FOR_ONE_HOUR = Date.now() + 3600 * 1000;
 Cache.FOR_TWO_HOURS = Cache.FOR_ONE_HOUR * 2;
 Cache.FOR_ONE_DAY = Cache.FOR_ONE_HOUR * 24;

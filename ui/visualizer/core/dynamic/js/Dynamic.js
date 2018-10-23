@@ -3,7 +3,7 @@ class Dynamic {
     * Constructor
     *
     */
-    constructor(...args) {
+    constructor() {
         // if (!this.methods) {
         //     this.methods = this.getAllAvailableClassMethods();
         // }
@@ -28,7 +28,11 @@ class Dynamic {
         });
         
         // this method is defined by user
-        this.__construct(...args);
+        if (arguments.length > 0) {
+            this.__construct(...arguments);
+        } else {
+            DI.resolve(this, '__construct');
+        }
 
         return this._proxy;
     }

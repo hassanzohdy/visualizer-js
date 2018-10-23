@@ -13,6 +13,7 @@
         "core/router",
         "core/layout",
         "core/events",
+        "core/socket",
         "core/view"
     ]
 }

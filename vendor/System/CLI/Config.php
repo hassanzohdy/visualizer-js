@@ -11,7 +11,7 @@ class Config
      * 
      * @const string 
      */
-    const CONFIG_PATH = 'vendor/System/Storage/visualizer/installed';
+    const CONFIG_PATH = 'vendor/System/storage/visualizer/installed';
 
     /**
      * Available configurations list
@@ -40,6 +40,8 @@ class Config
     public static function create(array $options)
     {
         $configText = '';
+
+        $options = array_merge((array) static::$options, $options);
 
         foreach ($options as $key => $value) {
             if ($value === false) {

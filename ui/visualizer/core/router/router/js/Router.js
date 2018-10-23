@@ -182,7 +182,8 @@ class Router {
         let route = '/' + currentUrl.removeFirst((SCRIPT_URL || BASE_URL).rtrim('/') + '/');
 
         // remove the locale from the url
-        route = route.replace(/^\/[ar|en]+(\/)?/, '/');
+        let regex = new RegExp(`^\/${Config.get('app.localeCode')}`);
+        route = route.replace(regex, '/').replace(/\/+/, '/');
 
         // decode the url if it has any uft8 encoding
         route = decodeURIComponent(route);
@@ -260,6 +261,9 @@ class Router {
     _handleHistoryLinks() {
         window.onpopstate = e => {
             if (Is.empty(this.stack)) return;
+
+            this.events.trigger('router.leaving', this.route());
+            
             // remove the current added url
             this.stack.pop();
             // get the previous url
@@ -282,6 +286,8 @@ class Router {
     * @param string url
     */
     _setUrl(url) {
+        this.events.trigger('router.leaving', this.route());
+
         this.stack.push(url);
 
         history.pushState(this.index++, null, url);

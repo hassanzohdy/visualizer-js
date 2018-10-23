@@ -1,4 +1,4 @@
-class _Partial {    
+class _Partial {
     /**
      * Constructor
      * 
@@ -7,9 +7,11 @@ class _Partial {
     constructor(layout, events) {
         this.layout = layout;
         this.events = events;
-        this.baseView = 'layout/common'; 
-    
-        this.events.on(`${this.name}.load` , () => {
+        this.baseView = 'layout/common';
+
+        DI.resolve(this, 'bootstrap');
+
+        this.events.on(`${this.name}.load`, () => {
             this.ready();
         });
     }
@@ -51,8 +53,8 @@ class _Partial {
      * The ready event is triggered once the content has been set
      * 
      */
-    ready() {}  
-    
+    ready() { }
+
     /**
     * Run the partial
     *

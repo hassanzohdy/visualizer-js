@@ -194,7 +194,7 @@ class Http {
     assets(scripts, stylesheets) {
         stylesheets = stylesheets.map(url => {
             return $.getStylesheet(url, linkTag => {
-                linkTag.insertBefore('.app-style');
+                linkTag.insertBefore('#app-style');
             });
         });
 

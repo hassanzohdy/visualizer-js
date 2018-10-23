@@ -7,7 +7,7 @@ class Application {
         // by default, if the developer doesn't change the `autoRun` property to false,
         // once the application loads, the `run` method will be called automatically after `init` method
         this.autoRun = true;
-        this.onReady = function () {};
+        this.onReady = function () { };
     }
 
     /**
@@ -22,12 +22,24 @@ class Application {
         this.events = DI.resolve('events');
         this.router = DI.resolve('router');
         this.layout = DI.resolve('layout');
+        this.smartViews = DI.resolve('smartViews');
 
         this.events.on('ready', () => {
             for (let className of Application.autoLoadedClasses) {
                 DI.resolve(className);
             }
-            
+
+            if (Config.get('app.env') === 'development') {
+                let socket = new Socket('http://localhost:2020');
+
+                socket.on('reload', () => {
+                    window.stop();
+                    document.location.reload();
+                }).on('hendawy', () => {
+                    echo('Welcome Mr Hedawy!');
+                });
+            }
+
             this.onReady();
         });
 

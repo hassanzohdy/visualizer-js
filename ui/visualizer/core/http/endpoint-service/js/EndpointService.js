@@ -3,14 +3,14 @@ class EndpointService {
      * Constructor
      * 
      */
-    constructor() {
-        this._endpoint = DI.resolve('endpoint');
+    constructor(endpoint) {
+        this._endpoint = endpoint;
 
         this.authorizable = true;
 
         this.route = null; 
-        
-        this.boot();
+               
+        DI.resolve(this, 'boot');
 
         if (! this.route) {
             throw new Error(`Endpoint Service Error: [${this.constructor.name} Class] => Please define the "route" property in the "boot" method.`);

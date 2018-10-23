@@ -27,7 +27,6 @@ class ModalFactory {
                 headingBtn: true,
             },
             removeOnHide: true,
-            closeOnOverlayClick: true, 
             footer: null,
             before: {
                 open: null, // on modal shown

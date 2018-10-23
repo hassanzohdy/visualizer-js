@@ -7,7 +7,7 @@ class placeholder extends Layout.Page {
     bootstrap() {
         this.name = 'placeholder';
 
-        this.viewName = 'placeholder/page';
+        this.viewName = 'page';
 
         this.title = trans('placeholder');
     }

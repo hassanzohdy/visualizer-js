@@ -23,6 +23,8 @@ class Install extends Command
 
         system('composer install');
 
+        system('npm install');
+
         $baseApp = static::flag('app', 'blog');
 
         $path = static::flag('path', '/');

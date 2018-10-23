@@ -70,12 +70,7 @@ class Layout {
         for (let i = 0; i < Layout.partials.length; i++) {
             let partial = DI.resolve(Layout.partials[i].name);
 
-            // delay for a little bit to call all bootstrap methods
-            setTimeout(() => {
-                DI.resolve(partial, 'bootstrap');
-
-                this.newPartial(partial);
-            }, 0);
+            this.newPartial(partial);
         }
     }
 
@@ -97,6 +92,7 @@ class Layout {
             this.partials.get(partialName).selector || partialName;
 
         this.container.find(selector).html(content);
+
         this.events.trigger(`${partialName}.load`, content, this);
     }
 
@@ -148,7 +144,7 @@ class Layout {
         if (!page.name) {
             throw new Error(`The passed page component to layout must contain the name property for that page name`);
         }
-
+        
         this.setupPage(page, pageOptions);
 
         this.pages.set(page.name, page);
@@ -294,7 +290,6 @@ class Layout {
             }
         });
     }
-
 }
 
 DI.register({
