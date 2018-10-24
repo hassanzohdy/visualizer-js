@@ -24,6 +24,10 @@ exports.Parser = class Parser {
 
         this.parsed = htmlCompiler.parsed;
 
+        if (! this.parsed) {
+            return this.parse();
+        }
+
         console.clear();
 
         // the try-catch block MUST BE removed in production to reduce size

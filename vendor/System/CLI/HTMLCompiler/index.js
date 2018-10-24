@@ -1,4 +1,4 @@
-const { echo, fs, ROOT, UI_DIR, glob, watcher, APP_DIR, APP_NAME, BASE_URL } = require('./bootstrap');
+const { echo, fs, ROOT, UI_DIR, watcher, APP_DIR, APP_NAME, BASE_URL } = require('./bootstrap');
 const io = require('socket.io')(2020);
 const exec = require('child-process-promise').exec;
 
@@ -10,33 +10,22 @@ console.log('Server has started...');
 
 const Parser = require('./compiler/Parser.js').Parser;
 
-glob(APP_DIR + '/**/smart-views/**/*.html', (error, files) => {
-    watch(files).on('all', (event, filePath) => {
-        fs.readFile(filePath, 'UTF8', (errors, html) => {
-            let parser = new Parser(html, filePath);
+watch(APP_DIR + '/**/smart-views/**/*.html').on('all', (event, filePath) => {
+    fs.readFile(filePath, 'UTF8', (errors, html) => {
+        let parser = new Parser(html, filePath);
 
-            parser.parse();
-        });
+        parser.parse();
     });
 });
 
-glob(ROOT + '/public/static/**/smart-views/**/*.js', (error, files) => {
-    watch(files).on('all', (event, filePath) => {
-        reloadApp();
-    });
+watch(ROOT + '/public/static/**/smart-views/**/*.js').on('all', (event, filePath) => {
+    reloadApp();
 });
 
-glob(UI_DIR + '/**/*.{scss,js}', (error, files) => {
-    watch(files).on('all', (event, filePath) => {
-        reloadApp();
-    });
+watch(UI_DIR + '/**/*.{scss,js}').on('all', (event, filePath) => {
+    reloadApp();
 });
 
-
-// rebuild the application on javascript creation
-function reloadApp() {
-    io.emit('reload');
-}
 
 watch(UI_DIR + '/**/js/*.js').on('add', (filePath) => {
     echo(`${filePath.removeFirst(UI_DIR)} has been created successfully`);
@@ -45,6 +34,11 @@ watch(UI_DIR + '/**/js/*.js').on('add', (filePath) => {
     echo(`${filePath.removeFirst(UI_DIR)} has been removed successfully`);
     rebuildApp();
 });
+
+watch(UI_DIR + '/**/html/*.html').on('change', () => {
+    reloadApp();
+});
+
 watch(UI_DIR + '/**/package.json').on('all', (filePath) => {
     rebuildApp().then(() => {
         reloadApp();
@@ -65,4 +59,10 @@ function watch(path) {
     return watcher.watch(path, {
         ignoreInitial: true,
     });
+}
+
+// rebuild the application on javascript creation
+function reloadApp() {
+    console.clear();
+    io.emit('reload');
 }

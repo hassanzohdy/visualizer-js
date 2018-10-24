@@ -16,6 +16,12 @@ class placeholder extends Smart.Page {
      * This method is triggered once the visitors hits the home page route
      */
     init() {
-        
+
+    }
+
+    /**
+     * This method is triggered after the page content is rendered
+     */
+    ready() {
     }
 }
