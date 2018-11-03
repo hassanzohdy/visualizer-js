@@ -1,7 +1,0 @@
-{
-    "name": "overlay",
-    "dependencies": [
-        "animator",
-        "random"
-    ]
-}

@@ -1,0 +1,8 @@
+{
+    "name": "core/router/router", 
+    "dependencies": [
+        "core/application",
+        "core/layout/layout",
+        "core/events"
+    ]
+}

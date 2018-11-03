@@ -3,8 +3,8 @@
 # compiled output
 public/static/
 node_modules
-ui/apps/
-ui/loader.json
+src/apps/
+src/loader.json
 /config.json
 /composer.lock
 /package-lock.json

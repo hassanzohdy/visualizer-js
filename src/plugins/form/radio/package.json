@@ -1,0 +1,16 @@
+{
+    "name": "form/radio",
+    "dependencies": [
+        "form/plugin"
+    ],
+    "vendor": {
+        "js": [
+            "jquery/hz/radio/js/radio.js"
+        ],
+        "css": {
+            "common": [
+                "jquery/hz/radio/css/radio.css"
+            ]
+        }
+    }
+}

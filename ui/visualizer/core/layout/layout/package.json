@@ -1,9 +1,0 @@
-{
-    "name": "core/layout/layout",
-    "dependencies": [
-        "core/view",
-        "core/events",
-        "dom",
-        "jquery"
-    ]
-}

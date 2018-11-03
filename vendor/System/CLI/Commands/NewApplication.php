@@ -31,7 +31,7 @@ class NewApplication extends Command
         // now copy the default application structure to that directory
         $fs = new FileSystem;
 
-        $fs->mirror($this->app->file->to('vendor/System/copied/ui-app'), $appPath = $this->app->file->to('ui/apps/' . $appName));
+        $fs->mirror($this->app->file->to('vendor/System/copied/ui-app'), $appPath = $this->app->file->to('src/apps/' . $appName));
 
         // update config.json file
         $this->putJson('config.json', $config);
@@ -45,13 +45,13 @@ class NewApplication extends Command
         $this->putJson($appPath . '/package.json', $appPackage);
 
         // create new empty assets/images directory in the application directory
-        mkdir('ui/apps/' . $appName . '/assets/images', 0777, true);
+        mkdir('src/apps/' . $appName . '/assets/images', 0777, true);
 
         // create default pages
-        mkdir('ui/apps/' . $appName . '/components/pages', 0777, true);
+        mkdir('src/apps/' . $appName . '/components/pages', 0777, true);
         
-        system('php visualize new:page not-found --route=* --app='. $appName .' --silent --rebuild=false --content="<h1 class=\\"text-center\\">Not Found Page</h1>');
-        system('php visualize new:page home --route=/ --app='. $appName .' --silent --rebuild=false --content="<h1 class=\\"text-center\\">Visualizer JS</h1>');
+        system('php visualize new:smart-page not-found --route=* --app='. $appName .' --silent --rebuild=false');
+        system('php visualize new:smart-page home --route=/ --app='. $appName .' --silent --rebuild=false');
         
         // now build the application
         system("php visualize build $appName --silent");

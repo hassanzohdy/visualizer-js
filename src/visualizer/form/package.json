@@ -1,0 +1,10 @@
+{
+    "name": "form",
+    "components": [
+        "form/form",
+        "form/plugin",
+        "form/builder",
+        "form/group",
+        "form/validator"
+    ]
+}

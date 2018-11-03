@@ -18,6 +18,7 @@ exports.HtmlCompiler = class HtmlCompiler {
         this.parse();
     }
 
+
     /**
      * Start parsing
      */
@@ -36,7 +37,7 @@ exports.HtmlCompiler = class HtmlCompiler {
      * @returns void
      */
     extract(element, id = null, staticAttributes = null) {
-        if (typeof element == 'undefined') return;
+        if (typeof element == 'undefined' || element.constructor.name == 'Comment') return;
 
         if (element.constructor.name === 'Text') {
             this.textNode(element.nodeValue);
@@ -45,7 +46,13 @@ exports.HtmlCompiler = class HtmlCompiler {
 
         let tag = element.tagName.toLowerCase(),
             attributes = '',
-            booleanAttributes = {};
+            booleanAttributes = {},
+            conditionalClasses = '';
+
+        if (tag === 'static') {
+            this.staticHtml(element.innerHTML);
+            return;
+        }
 
         if (element.hasAttribute('*for')) {
             // combination between if and for in same element
@@ -68,6 +75,9 @@ exports.HtmlCompiler = class HtmlCompiler {
             let styling = element.getAttribute('[style]');
             element.removeAttribute('[style]');
             attributes += `, 'style', ${styling}`;
+        } else if (element.hasAttribute('[class]')) {
+            conditionalClasses = element.getAttribute('[class]');
+            element.removeAttribute('[class]');
         }
 
         if (tag == 'if') {
@@ -86,6 +96,7 @@ exports.HtmlCompiler = class HtmlCompiler {
             return this.controlStructure(element, 'else', null, 'extractChildren');
         }
 
+        // if (tag != 'button')
         for (let attribute of element.attributes) {
             let attributeName = attribute.name,
                 value = attribute.value;
@@ -98,9 +109,9 @@ exports.HtmlCompiler = class HtmlCompiler {
                         ${value}
                     }
                 `.trim();
+
             } else if (attribute.name.includes('[') && attribute.name.includes(']')) {
                 attributeName = attribute.name.replace(/\[|\]/g, '');
-                element.removeAttribute(attribute.name);
                 booleanAttributes[attributeName] = `${value}`;
                 continue;
             } else {
@@ -127,6 +138,15 @@ exports.HtmlCompiler = class HtmlCompiler {
             for (let attribute in booleanAttributes) {
                 this.parsed += this.line(`${elementVariable}.${attribute} = ${booleanAttributes[attribute]}`);
             }
+        }
+
+        if (conditionalClasses) {
+            this.parsed += this.line(`${elementVariable}.conditionalClasses = ${conditionalClasses}`);
+            this.parsed += `
+                for (let className in ${elementVariable}.conditionalClasses) {
+                    ${elementVariable}.classList.toggle(className, ${elementVariable}.conditionalClasses[className]);
+                }  
+            `;
         }
 
         this.extractChildren(element);
@@ -181,12 +201,7 @@ exports.HtmlCompiler = class HtmlCompiler {
 
         if (!nodeValue) return '';
 
-        if (nodeValue.includes('@html')) {
-            nodeValue.replace(/@html\((.*)\)/, (original, value) => {
-                this.staticHtml('${' + value + '}');
-            });
-            return '';
-        } else if (nodeValue.includes('@echo')) {
+        if (nodeValue.includes('@echo')) {
             nodeValue.replace(/@echo\((.*)\)/, (original, value) => {
                 this.parsed += this.line(`console.log(${value})`);
             });
@@ -210,6 +225,7 @@ exports.HtmlCompiler = class HtmlCompiler {
      * @returns void
      */
     staticHtml(html) {
+        html = html.replace(/\`/g, '\\`');
         let elementVariable = `el${Random.string(4)}`;
 
         this.parsed += this.line(`var ${elementVariable} = elementOpen('html-blob')`);
@@ -224,7 +240,7 @@ exports.HtmlCompiler = class HtmlCompiler {
      * @param   string text
      */
     convert(text) {
-        let regex = /(?:\{\{(.+?)\}\})+/g;
+        let regex = /(?:\{\{(.+?)\}\})+/gm;
         return text.replace(regex, "${$1}");
     }
 

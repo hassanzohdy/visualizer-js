@@ -1,7 +1,0 @@
-{
-    "name": "dom/builder",
-    "dependencies": [
-        "jquery",
-        "core/application"
-    ]
-}

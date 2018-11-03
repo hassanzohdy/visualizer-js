@@ -1,0 +1,39 @@
+<!-- Prompt Box -->
+<div class="prompt-box hidden" id="{{ settings.id }}">
+    <!-- Prompt Content -->
+    <div class="prompt-content {{ settings.label }}">
+        if (settings.heading.text || settings.heading.icon)
+            <!-- Prompt Heading -->
+            <div class="prompt-heading">
+                <!-- Heading Text -->
+                <div class="heading-text" *if="settings.heading.text">{{ settings.heading.text }}</div>
+                <!--/ Heading Text -->
+                <!-- Heading Icon -->
+                <i *if="settings.heading.icon" class="{{ settings.heading.icon }}"></i>
+                <!-- Heading Icon -->
+            </div>
+            <!--/ Prompt Heading -->
+        endif
+        <!-- Prompt Message -->
+        <div *if="settings.message" class="prompt-message">{{ settings.message }}</div>
+        <!--/ Prompt Message -->
+
+        <!-- Prompt Form -->
+        <form class="prompt-form">
+            for (let input of settings.inputs)
+                {{ input }}
+            endfor
+            <!-- Prompt Buttons -->
+            <div class="prompt-buttons">
+                <button class="confirm-button {{ settings.buttons.confirm.class || '' }}">{{ settings.buttons.confirm.text }}</button>
+                if (! Is.empty(settings.buttons.cancel))
+                    <button type="button" class="cancel-button {{ settings.buttons.cancel.class || '' }}">{{ settings.buttons.cancel.text }}</button>
+                endif
+            </div>
+            <!--/ Prompt Buttons -->
+        </form>
+        <!--/ Prompt Form -->
+    </div>
+    <!--/ Prompt Content  -->
+</div>
+<!--/  Prompt Box -->

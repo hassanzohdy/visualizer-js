@@ -1,8 +1,0 @@
-{
-    "name": "jquery",
-    "vendor": {
-        "js": [
-            "jquery/jquery/3.3.1/js/jquery.min.js"
-        ]
-    }
-}

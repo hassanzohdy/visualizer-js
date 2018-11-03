@@ -1,9 +1,0 @@
-{
-    "name": "user",
-    "dependencies": [
-        "core/events",
-        "core/router",
-        "cache",
-        "session"
-    ]
-}

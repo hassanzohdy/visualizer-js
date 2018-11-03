@@ -1,7 +1,0 @@
-{
-    "name": "core/router",
-    "components": [
-        "core/router/router",
-        "core/router/middleware"
-    ]
-}

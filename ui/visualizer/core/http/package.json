@@ -1,8 +1,0 @@
-{
-    "name": "core/http", 
-    "components": [
-        "core/http/http",
-        "core/http/endpoint",
-        "core/http/endpoint-service"
-    ]
-}

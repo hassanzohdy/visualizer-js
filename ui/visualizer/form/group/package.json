@@ -1,6 +1,0 @@
-{
-    "name": "form/group",
-    "dependencies": [
-        "form/builder"
-    ]
-}

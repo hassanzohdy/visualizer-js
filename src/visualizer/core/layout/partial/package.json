@@ -1,0 +1,7 @@
+{
+    "name": "core/layout/partial",
+    "dependencies": [
+        "core/layout/layout",
+        "core/events"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "name": "form/form",
+    "dependencies": [
+        "core/application"
+    ],
+    "vendor": {
+        "js": [
+            "jquery/jquery-serialize-object/js/jquery.serialize-object.min.js"
+        ]
+    }
+}

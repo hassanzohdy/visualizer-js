@@ -1,0 +1,6 @@
+{
+    "name": "core/application",
+    "dependencies": [
+        "support"
+    ]
+}

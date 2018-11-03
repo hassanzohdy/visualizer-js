@@ -1,6 +1,0 @@
-{
-    "name": "dom/meta",
-    "dependencies": [
-        "dom/builder"
-    ]
-}

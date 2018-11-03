@@ -1,8 +1,8 @@
 <?php
 namespace System\CLI;
 
-use System\Application;
 use System\Console;
+use System\Application;
 
 class Config
 {
@@ -22,6 +22,7 @@ class Config
         'colored',
         'silent',
         'baseApp',
+        'openBrowser',
     ];
 
     /**

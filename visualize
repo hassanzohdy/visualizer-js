@@ -29,6 +29,7 @@ $commandsList = [
     'produce' => System\CLI\Commands\ProduceApplication::class,
     'global' => System\CLI\Commands\GlobalConfigurations::class,
     'new:smart-page' => System\CLI\Commands\NewSmartPage::class,
+    'build:smartViews' => System\CLI\Commands\BuildSmartViews::class,
 ];
 
 if ($command == 'install') {

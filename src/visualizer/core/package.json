@@ -1,0 +1,16 @@
+{
+    "name": "core",
+    "components": [
+        "core/dependency-injection",
+        "core/config",
+        "core/application",
+        "core/dynamic",
+        "core/http",
+        "core/router",
+        "core/layout",
+        "core/smart-layout",
+        "core/events",
+        "core/socket",
+        "core/view"
+    ]
+}

@@ -1,0 +1,8 @@
+{
+    "name": "modal",
+    "dependencies": [
+        "animator",
+        "support",
+        "random"
+    ]
+}

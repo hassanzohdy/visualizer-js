@@ -3,12 +3,11 @@ namespace System;
 
 use Closure;
 use Whoops\Run AS Whoops;
-use Illuminate\Container\Container;
 use Whoops\Util\Misc AS WhoopsMIsc;
 use Whoops\Handler\PrettyPageHandler;
 use Whoops\Handler\JsonResponseHandler;
 
-class Application extends Container
+class Application
 {
     /**
     * Framework Version

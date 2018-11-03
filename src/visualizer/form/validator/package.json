@@ -1,0 +1,8 @@
+{
+    "name": "form/validator",
+    "dependencies": [
+        "keyboard",
+        "locale",
+        "form/form"
+    ]
+}

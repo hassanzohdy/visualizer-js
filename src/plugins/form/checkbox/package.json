@@ -1,0 +1,16 @@
+{
+    "name": "form/checkbox",
+    "dependencies": [
+        "form/plugin"
+    ],
+    "vendor": {
+        "js": [
+            "jquery/hz/checkbox/js/checkbox.js"
+        ],
+        "css": {
+            "common": [
+                "jquery/hz/checkbox/css/checkbox.css"
+            ]
+        }
+    }
+}

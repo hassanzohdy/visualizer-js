@@ -1,0 +1,8 @@
+{
+    "name": "core/layout/layout",
+    "dependencies": [
+        "core/config",
+        "core/view",
+        "core/events"
+    ]
+}

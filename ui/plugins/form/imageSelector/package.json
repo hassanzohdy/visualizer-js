@@ -1,7 +1,0 @@
-{
-    "name": "form/imageSelector",
-    "dependencies": [
-        "dom/builder",
-        "form/plugin"
-    ]
-}

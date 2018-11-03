@@ -1,12 +1,13 @@
-const { echo, fs, path, ROOT, APP_NAME, JSDOM, APP_DIR, UI_DIR, random, FRAMEWORK_NAME } = require('./../bootstrap');
+const { echo, fs, path, ROOT, APP_NAME, JSDOM, APP_DIR, SRC_DIR, random, FRAMEWORK_NAME } = require('./../bootstrap');
 
-require(UI_DIR + '/visualizer/random/js/Random.js');
+require(SRC_DIR + '/visualizer/random/js/Random.js');
 const HtmlCompiler = require('./HtmlCompiler').HtmlCompiler;
 const minify = require("babel-minify");
-
-exports.Parser = class Parser {
-    constructor(html, filePath) {
+class Parser {
+    constructor(html, filePath, env = Parser.DEVELOPMENT_MODE) {
         const dom = new JSDOM(html);
+
+        this.env = env;
 
         this.prepareViewName(filePath);
 
@@ -29,9 +30,11 @@ exports.Parser = class Parser {
         }
 
         console.clear();
+        let fileContent = '';
 
-        // the try-catch block MUST BE removed in production to reduce size
-        let fileContent = `
+        if (this.env == Parser.DEVELOPMENT_MODE) {
+            // the try-catch block MUST BE removed in production to reduce size
+            fileContent = `
             SMART_VIEWS['${this.viewName}'] = function (data) {
                 try {
                 ${this.parsed}
@@ -42,8 +45,10 @@ exports.Parser = class Parser {
             }
         };
         `.trim();
-
-        // fileContent = minify(fileContent).code;
+        } else {
+            fileContent = `SMART_VIEWS['${this.viewName}']=function(data){${this.parsed}};`;
+            fileContent = minify(fileContent).code;
+        }
 
         fs.writeFile(`${ROOT}/public/static/${APP_NAME}/smart-views/${this.viewName.replace(/\//g, '-')}.js`, fileContent, 'utf8', () => {
             echo(`${this.viewName} has been compiled successfully`);
@@ -51,7 +56,7 @@ exports.Parser = class Parser {
     }
 
     prepareViewName(filePath) {
-        filePath = filePath.ltrim(UI_DIR).trim('/');
+        filePath = filePath.ltrim(SRC_DIR).trim('/');
 
         if (filePath.includes(FRAMEWORK_NAME)) {
             filePath = filePath.replace(new RegExp(FRAMEWORK_NAME), '');
@@ -65,3 +70,8 @@ exports.Parser = class Parser {
         this.viewName = filePath.trim('/').removeLast('.html').replace('smart-views/', '');
     }
 }
+
+Parser.DEVELOPMENT_MODE = 'dev';
+Parser.PRODUCTION_MODE = 'prod';
+
+exports.Parser = Parser;

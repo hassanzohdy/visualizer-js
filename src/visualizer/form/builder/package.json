@@ -1,0 +1,6 @@
+{
+    "name": "form/builder",
+    "dependencies": [
+        "form/form"
+    ]
+}

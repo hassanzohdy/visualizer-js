@@ -1,8 +1,0 @@
-{
-    "name": "bootstrap/tooltip",
-    "type": "plugin",
-    "version": 1.0,
-    "dependencies": [
-        "bootstrap"
-    ]
-}

@@ -8,6 +8,27 @@ use System\CLI\Config;
 class NewPage extends Command
 {
     /**
+     * Page Directory
+     * 
+     * @var string
+     */
+    protected $pageDirectory = 'ui-page';
+
+    /**
+     * Layout class
+     * 
+     * @var string
+     */
+    protected $layoutClass = 'Layout';
+
+    /**
+     * Html directory
+     * 
+     * @var string
+     */
+    protected $htmlDirectory = 'html';
+
+    /**
      * Application name
      *
      * @var string
@@ -64,7 +85,7 @@ class NewPage extends Command
 
         foreach ($pages as $pageName) {
             $pageName = str_replace('//', '/', $pageName);
-            $this->pageComponentPath = "ui/apps/{$appName}/components/pages/{$pageName}";
+            $this->pageComponentPath = "src/apps/{$appName}/components/pages/{$pageName}";
 
             if (is_dir($this->pageComponentPath)) {
                 static::red(sprintf('%s page already exists!', $pageName));
@@ -79,7 +100,7 @@ class NewPage extends Command
 
             // first we will copy the page component
 
-            $fs->mirror('vendor/System/copied/ui-page', $this->pageComponentPath);
+            $fs->mirror('vendor/System/copied/' . $this->pageDirectory, $this->pageComponentPath);
 
             // now we will update all files to replace the placeholder with the page name
             // update js file
@@ -95,7 +116,7 @@ class NewPage extends Command
             static::green(sprintf('%s has been created successfully!', $totalCreatedPages == 1 ? $pageName . ' page' : $totalCreatedPages . ' pages'));
 
             // rebuild the application again
-            if (static::flag('rebuild') !== 'false') {
+            if (static::flag('rebuild') !== false) {
                 system("php visualize build $appName --silent");
             }
         }
@@ -112,6 +133,7 @@ class NewPage extends Command
         $jsFile = file_get_contents($this->pageComponentPath . '/js/Page.js');
 
         $jsFile = str_replace('class placeholder', "class {$this->className}Page", $jsFile);
+        $jsFile = str_replace('extends Layout', "extends {$this->layoutClass}", $jsFile);
 
         $jsFile = str_replace("this.name = 'placeholder';", "this.name = '{$this->pageNameAlias}';", $jsFile);
         $jsFile = str_replace("placeholder", str_replace('/', '-', $pageName), $jsFile);
@@ -131,7 +153,9 @@ class NewPage extends Command
     {
         $pageContent = static::flag('content', "<h1 class=\"text-center\">{$pageName} Page</h1>");
 
-        file_put_contents($this->pageComponentPath . '/html/page.html', $pageContent);
+        rename("{$this->pageComponentPath}/html", "{$this->pageComponentPath}/{$this->htmlDirectory}");
+
+        file_put_contents("{$this->pageComponentPath}/{$this->htmlDirectory}/page.html", $pageContent);
     }
 
     /**
@@ -163,7 +187,7 @@ class NewPage extends Command
      */
     private function addPageRoute(string $pageName)
     {
-        $routingJs = file($routingJsPath = "ui/apps/{$this->appName}/components/routing.js");
+        $routingJs = file($routingJsPath = "src/apps/{$this->appName}/components/routing.js");
 
         $route = static::flag('route', "/$pageName");
 

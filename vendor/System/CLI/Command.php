@@ -14,6 +14,13 @@ abstract class Command
     protected $app;
 
     /**
+     * Original Options list
+     *
+     * @var array
+     */
+    protected $originalOptionsList = [];
+
+    /**
      * Options list
      *
      * @var array
@@ -36,7 +43,7 @@ abstract class Command
     public function __construct(array $optionsList, Application $app = null)
     {
         $this->app = $app;
-        $this->optionsList = $optionsList;
+        $this->originalOptionsList = $this->optionsList = $optionsList;
 
         static::collectFlags($this->optionsList);
     }

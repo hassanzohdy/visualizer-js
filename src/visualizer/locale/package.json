@@ -1,0 +1,7 @@
+{
+    "name": "locale",
+    "dependencies": [
+        "core/events",
+        "cache"
+    ]
+}

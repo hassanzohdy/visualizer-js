@@ -1,0 +1,34 @@
+<div class="modal fade" [class]="{fade: options.fade}" id="{{ options.modalId }}" {{ options.tabindex ? 'tabindex="-1"' : '' }} role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" [style]="options.style" role="document">
+        <div class="modal-content">
+            if (options.heading)
+                <div class="modal-header">
+                    if (options.closeBy.headingBtn && options.buttons.headingCloseBtn) 
+                        {{ options.buttons.headingCloseBtn }} 
+                    endif
+                    <h3 class="modal-title">{{ options.heading }}</h3>
+                </div>
+            else if (options.buttons.headingCloseBtn)
+                {{ options.buttons.headingCloseBtn }}
+            endif
+            
+            <div class="modal-body">{{ options.content }}</div>
+
+            if (options.footer || options.buttons.confirm || options.buttons.close) 
+                <div class="modal-footer">
+                    if (options.footer)
+                        {{ options.footer }}
+                    endif
+                    
+                    if (options.buttons.close)
+                        {{ options.buttons.close }}
+                    endif
+
+                    if (options.buttons.confirm)
+                        {{ options.buttons.confirm }}
+                    endif
+                </div>                
+            endif
+        </div>
+    </div>
+</div>

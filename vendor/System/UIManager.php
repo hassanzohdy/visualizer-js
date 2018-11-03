@@ -17,11 +17,11 @@ class UIManager
     private $loader;
 
     /**
-     * Ui directory
+     * src directory
      *
      * @var string
      */
-    private $uiDir;
+    private $srcDir;
 
     /**
      * Static path to store files
@@ -176,11 +176,21 @@ class UIManager
         $this->forceRebuild = $forceRebuild;
 
         // remove the app directory first
+        $appDir = 'public/static/' . $this->currentApp->name;
 
         if (is_dir('public/static/' . $this->currentApp->name)) {
-            @(new FileSystem)->remove('public/static/' . $this->currentApp->name . '/css');
-            @(new FileSystem)->remove('public/static/' . $this->currentApp->name . '/js');
+            $fs = new FileSystem;
+
+            try {
+                $fs->remove($appDir);
+            } catch (Exception $e) {
+                $fs->remove($appDir);
+            }
+
+            // @(new FileSystem)->remove('public/static/' . $this->currentApp->name . '/js');
         }
+
+        @mkdir($appDir . '/smart-views', 0777, true);
 
         return $this;
     }
@@ -354,7 +364,7 @@ class UIManager
 
         $this->init();
 
-        $this->uiDir = $this->app->file->to('ui') . '/';
+        $this->srcDir = $this->app->file->to('src') . '/';
 
         $this->staticDir = $this->app->file->toPublic('static') . '/' . $this->currentApp->name . '/';
 
@@ -365,8 +375,19 @@ class UIManager
         $this->env = 'production';
 
         $this->build();
+        $this->buildSmartViews();
         $this->compileScss();
         $this->renderHtmlViews();
+    }
+
+    /**
+     * Build smart views
+     * 
+     * @return void
+     */
+    protected function buildSmartViews()
+    {        
+        exec('php visualize build:smartViews');
     }
 
     /**
@@ -424,7 +445,7 @@ class UIManager
      */
     private function runInDevelopmentMode()
     {
-        $this->uiDir = $this->app->file->to('ui') . '/';
+        $this->srcDir = $this->app->file->to('src') . '/';
 
         $this->staticDir = $this->app->file->toPublic('static') . '/' . $this->currentApp->name . '/';
 
@@ -604,7 +625,7 @@ class UIManager
             $js .= file_get_contents(ltrim($jsPath, '/')) . ';' . PHP_EOL;
         }
 
-        mkdir('public/static/' . $this->currentApp->name . '/js-builds');
+        mkdir('public/static/' . $this->currentApp->name . '/js-builds', 0777, true);
 
         file_put_contents('public/static/' . $this->currentApp->name . '/js-builds/vendor.js', $js);
 
@@ -649,7 +670,7 @@ class UIManager
      */
     private function babelCompiler()
     {
-        mkdir($jsBuildsDir = 'public/static/' . $this->currentApp->name . '/js-builds');
+        mkdir($jsBuildsDir = 'public/static/' . $this->currentApp->name . '/js-builds', 0777);
 
         $this->scripts = [
             'es5' => [],
@@ -686,6 +707,14 @@ class UIManager
 
         foreach ($this->resources['jsFiles'] as $jsPath) {
             $js .= file_get_contents(ltrim($jsPath, '/')) . ';' . PHP_EOL;
+        }
+
+        // smart-views files
+        
+        $smartViewsFinder = new Finder;
+
+        foreach ($smartViewsFinder->in($this->app->file->toPublic('static/' . $this->currentApp->name . '/smart-views'))->files() as $file) {
+            $js .= file_get_contents($file->getRealPath()) . ';' . PHP_EOL;
         }
 
         $inputFile = $this->app->file->toPublic('static/' . $this->currentApp->name . '/js-builds/app.js');
@@ -796,7 +825,7 @@ class UIManager
     private function loadLoader()
     {
         if (!$this->exists('loader.json')) {
-            throw new Exception(sprintf('Loader.json file does not exist in ui directory'));
+            throw new Exception(sprintf('Loader.json file does not exist in src directory'));
         }
 
         $this->loader = $this->load('loader.json');
@@ -1016,20 +1045,20 @@ class UIManager
                     }
                 } else {
                     if ($vendorType == 'js') {
-                        $p = $this->app->file->to('ui/vendor/' . $vendor);
+                        $p = $this->app->file->to('src/vendor/' . $vendor);
                         if (!file_exists($p)) {
                             throw new Exception('Not Found Vendor: ' . $vendor);
                         }
 
-                        $this->resources['jsVendor'][] = '/ui/vendor/' . $vendor;
+                        $this->resources['jsVendor'][] = '/src/vendor/' . $vendor;
                     } else {
-                        $vendorContent .= file_get_contents($this->uiDir . 'vendor/' . $vendor) . PHP_EOL;
+                        $vendorContent .= file_get_contents($this->srcDir . 'vendor/' . $vendor) . PHP_EOL;
                     }
                 }
             }
 
             if (!is_dir($this->staticDir . $vendorType)) {
-                @mkdir($this->staticDir . $vendorType);
+                @mkdir($this->staticDir . $vendorType, 0777, true);
             }
 
             // save the vendor code
@@ -1066,7 +1095,7 @@ class UIManager
 
             if (is_string($this->resources['favicon'])) {
                 $favicon = $this->resources['favicon'];
-                $from = $this->uiDir . "apps/{$this->currentApp->name}/assets/$favicon";
+                $from = $this->srcDir . "apps/{$this->currentApp->name}/assets/$favicon";
 
                 if (!is_file($from)) {
                     $to = $this->staticDir . 'assets/' . $favicon;
@@ -1122,7 +1151,7 @@ class UIManager
         $packagesList = [];
 
         foreach ($this->resources['packages'] as $packageNamespace => $packagePath) {
-            $this->resources['packages'][$packageNamespace] = 'ui/' . $packagePath;
+            $this->resources['packages'][$packageNamespace] = 'src/' . $packagePath;
         }
 
         // add a global variable __EXTERNALS__ to the beginning of the vendor file
@@ -1135,7 +1164,7 @@ class UIManager
         $this->resources['jsFiles'][] = '/public/static/' . $this->currentApp->name . '/js/__views__.js';
 
         foreach ($jsFinder->in($this->resources['packages'])->path('js')->files()->name('*.js') as $file) {
-            $jsPath = str_replace('\\', '/', substr($file->getRealPath(), strpos($file->getRealPath(), 'ui')));
+            $jsPath = str_replace('\\', '/', substr($file->getRealPath(), strpos($file->getRealPath(), 'src')));
 
             if (in_array($jsPath, $this->resources['jsFiles'])) {
                 continue;
@@ -1144,9 +1173,9 @@ class UIManager
             $this->resources['jsFiles'][] = $jsPath;
         }
 
-        $this->resources['jsFiles'][] = 'ui/apps/' . $this->currentApp->name . '/components/config.js';
-        $this->resources['jsFiles'][] = 'ui/apps/' . $this->currentApp->name . '/components/routing.js';
-        $this->resources['jsFiles'][] = 'ui/apps/' . $this->currentApp->name . '/components/app.js';
+        $this->resources['jsFiles'][] = 'src/apps/' . $this->currentApp->name . '/components/config.js';
+        $this->resources['jsFiles'][] = 'src/apps/' . $this->currentApp->name . '/components/routing.js';
+        $this->resources['jsFiles'][] = 'src/apps/' . $this->currentApp->name . '/components/app.js';
         $this->resources['jsFiles'][] = 'public/static/' . $this->currentApp->name . '/js/__run__.js';
 
         $jsRunner = '
@@ -1186,11 +1215,11 @@ class UIManager
         // the scss path will be the path of scss folder in the app folder
         // as it will next to components folder
         $scssPath = [
-            $this->app->file->to('ui/scss'),
-            $this->app->file->to('ui/apps/' . $this->currentApp->name . '/scss/'),
+            $this->app->file->to('src/scss'),
+            $this->app->file->to('src/apps/' . $this->currentApp->name . '/scss/'),
         ];
 
-        if (file_exists($this->app->file->to('ui/apps/' . $this->currentApp->name . '/scss/app.scss'))) {
+        if (file_exists($this->app->file->to('src/apps/' . $this->currentApp->name . '/scss/app.scss'))) {
             // start compiling sass code
             $scss = new Compiler();
             $scss->setImportPaths($scssPath);
@@ -1243,7 +1272,7 @@ class UIManager
 
         foreach ($htmlFinder->in($this->resources['packages'])->path('html')->files()->name('*.html') as $file) {
             // the full url will be something like
-            // C:\xampp\htdocs\app\public\ui/components/alert\html\alert.html
+            // C:\xampp\htdocs\app\public\src/components/alert\html\alert.html
             $fullPath = $file->getRealPath();
 
             if (in_array($fullPath, $loadedViews)) {
@@ -1252,24 +1281,24 @@ class UIManager
 
             $loadedViews[] = $fullPath;
 
-            // remove the full path to the ui directory and keep only the relative component path
+            // remove the full path to the src directory and keep only the relative component path
             // this will be something like
             // components\alert\html\alert.html
-            $relativeUiPath = str_remove_start($fullPath, $this->uiDir);
+            $relativeSrcPath = str_remove_start($fullPath, $this->srcDir);
 
             // replace the directory separator with /
             // this will be something like
             // components/alert/html/alert.html
-            $relativeUiPath = str_replace(DIRECTORY_SEPARATOR, '/', $relativeUiPath);
+            $relativeSrcPath = str_replace(DIRECTORY_SEPARATOR, '/', $relativeSrcPath);
 
             // if the relative path starts with components
             // then this is treated as a core component view
             // otherwise, it would be an app component view
-            if (strpos($relativeUiPath, $this->framework) === 0) {
+            if (strpos($relativeSrcPath, $this->framework) === 0) {
                 // remove components word
                 // this will be something like
                 // alert/html/alert.html
-                $viewPath = Str::replaceFirst($this->framework . '/', '', $relativeUiPath);
+                $viewPath = Str::replaceFirst($this->framework . '/', '', $relativeSrcPath);
 
                 // make sure there is no slashes
                 $viewPath = trim($viewPath, '/');
@@ -1299,9 +1328,9 @@ class UIManager
                 // this will be something like
                 // [alert, alert]
                 $viewPath[] = $viewName;
-            } elseif (strpos($relativeUiPath, 'plugins') === 0) {
+            } elseif (strpos($relativeSrcPath, 'plugins') === 0) {
                 // make sure there is no slashes
-                $viewPath = trim($relativeUiPath, '/');
+                $viewPath = trim($relativeSrcPath, '/');
 
                 // now we will remove the .html from the end
                 // this will be something like
@@ -1333,7 +1362,7 @@ class UIManager
                 // remove app/aapName/components/
                 // this will be something like
                 // account/addresses/html/hendawy.html
-                $viewPath = str_remove_start($relativeUiPath, 'app/' . $this->currentApp->name . '/components/');
+                $viewPath = str_remove_start($relativeSrcPath, 'app/' . $this->currentApp->name . '/components/');
                 // make sure there is no slashes
                 $viewPath = trim($viewPath, '/');
 
@@ -1452,25 +1481,25 @@ class UIManager
     }
 
     /**
-     * Determine whether if the given file exists in the ui directory
+     * Determine whether if the given file exists in the src directory
      *
      * @param string $path
      * @return bool
      */
     private function exists($path)
     {
-        return file_exists($this->uiDir . $path);
+        return file_exists($this->srcDir . $path);
     }
 
     /**
-     * Get full path in ui directory
+     * Get full path in src directory
      *
      * @param string $path
      * @return string
      */
     private function path($path)
     {
-        return $this->uiDir . $path;
+        return $this->srcDir . $path;
     }
 
     /**

@@ -1,0 +1,47 @@
+@mixin markdownCode() {
+    text-shadow: 1px 1px #eee;
+    font-weight: bold;
+    background: #FFF;
+    color: $purpleColor;
+}
+
+.markdown-container {
+    font-size: 1.4rem;
+    @for $i from 1 through 10 {
+        h#{$i} {
+            font-weight: bold !important;
+            margin: 2rem 0;
+        }
+    }
+    li {
+        list-style-position: inside;
+        p {
+            display: inline;
+        }
+    }
+    blockquote {
+        padding: 0 1em;
+        color: #6a737d;
+        background: #FFF;
+        border-left: 0.25em solid #dfe2e5;
+    }
+    code {
+        margin: 1rem auto;
+        &.inlined-code {
+            @include markdownCode();
+            display: inline;
+        }
+    }
+    &.codable {
+        code {
+            @include markdownCode();
+        }
+    }
+    strong {
+        font-weight: bold;
+    }
+    a {
+        font-weight: bold;
+        color: $mainColor !important;
+    }
+}

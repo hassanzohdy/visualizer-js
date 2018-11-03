@@ -16,11 +16,17 @@ class Install extends Command
         
         static::yellow("Installing...\r\n");
 
-        mkdir('ui/apps');
-        mkdir('vendor/System/storage/visualizer');
-        copy('vendor/System/copied/config.json', 'config.json');
-        copy('vendor/System/copied/loader.json', 'ui/loader.json');
+        @mkdir('src/apps', 0755);
+        @mkdir('vendor/System/storage/visualizer', 0755);
 
+        if (! file_exists($configFile = 'vendor/System/copied/config.json')) {
+            @copy($configFile, 'config.json');
+        }
+
+        if (! file_exists($loaderFile = 'vendor/System/copied/loader.json')) {
+            @copy($loaderFile, 'src/loader.json');
+        }
+        
         system('composer install');
 
         system('npm install');
@@ -33,6 +39,7 @@ class Install extends Command
             'baseApp' => $baseApp,
             'colored' => static::flag('colored', true),
             'silent' => static::flag('silent', false),
+            'openBrowser' => static::flag('openBrowser', true),
         ];
 
         Config::create($options);

@@ -27,6 +27,6 @@ class ProduceApplication extends Command
 
         $this->app->ui->compileForProduction();
 
-        static::green('App has been compiled successfully Completed!');
+        static::green('App has been compiled successfully!');
     }
 }

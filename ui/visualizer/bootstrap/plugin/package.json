@@ -1,8 +1,0 @@
-{
-    "name": "bootstrap/plugin",
-    "version": 1.0,
-    "dependencies": [
-        "bootstrap/bootstrap",
-        "macroable"
-    ]
-}

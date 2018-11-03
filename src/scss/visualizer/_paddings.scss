@@ -1,0 +1,35 @@
+.no-p {
+    padding: 0 !important;
+}
+
+.no-p-l {
+    padding-left: 0 !important;
+}
+
+.no-p-r {
+    padding-right: 0 !important;
+}
+
+.no-p-t {
+    padding-top: 0 !important;
+}
+
+.no-p-b {
+    padding-bottom: 0 !important;
+}   
+
+
+@for $i from 1 through 10 {
+    .p-t-#{$i} {
+        padding-top: #{$i}rem;
+    }
+    .p-r-#{$i} {
+        padding-right: #{$i}rem;
+    }
+    .p-b-#{$i} {
+        padding-bottom: #{$i}rem;
+    }
+    .p-l-#{$i} {
+        padding-left: #{$i}rem;
+    }
+}

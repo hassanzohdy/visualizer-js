@@ -1,0 +1,6 @@
+{
+    "name": "item",
+    "dependencies": [
+        "core/dynamic"
+    ]
+}

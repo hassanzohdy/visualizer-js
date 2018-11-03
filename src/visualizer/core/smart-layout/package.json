@@ -1,0 +1,16 @@
+{
+    "name": "core/smart-layout",
+    "dependencies": [
+        "random"
+    ],
+    "vendor": {
+        "js": [
+            "javascript/incremental-dom/0.5.1/js/incremental-dom-min.js"
+        ]
+    },
+    "components": [
+        "core/smart-layout/layout",
+        "core/smart-layout/page",
+        "core/smart-layout/partial"
+    ]
+}

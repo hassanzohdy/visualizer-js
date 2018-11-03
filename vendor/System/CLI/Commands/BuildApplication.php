@@ -2,6 +2,7 @@
 namespace System\CLI\Commands;
 
 use System\Console;
+use System\CLI\Config;
 use System\CLI\Command;
 
 class BuildApplication extends Command
@@ -26,6 +27,10 @@ class BuildApplication extends Command
         static::yellow('Building application...');
         
         static::build($appName);
+
+        if (! static::flag('withoutSmartViews')) {
+            exec('php visualize build:smartViews');
+        }
 
         static::green('Application Build has been completed successfully!');
     }
